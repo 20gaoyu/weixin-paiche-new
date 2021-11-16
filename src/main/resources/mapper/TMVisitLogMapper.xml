@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.gy.dao.TMVisitLogMapper">
+    <resultMap id="BaseResultMap" type="cn.gy.bean.TMVisitLog">
+        <!--
+          WARNING - @mbg.generated
+        -->
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="account_id" jdbcType="BIGINT" property="accountId"/>
+        <result column="account_name" jdbcType="VARCHAR" property="accountName"/>
+        <result column="customer_id" jdbcType="BIGINT" property="customerId"/>
+        <result column="customer_name" jdbcType="VARCHAR" property="customerName"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="visit_time" jdbcType="TIMESTAMP" property="visitTime"/>
+        <result column="visitor_ip" jdbcType="VARCHAR" property="visitorIp"/>
+        <result column="visit_url" jdbcType="VARCHAR" property="visitUrl"/>
+        <result column="request_content" jdbcType="VARCHAR" property="requestContent"/>
+    </resultMap>
+    <resultMap id="activeUserCntVoResultMap" type="cn.gy.bean.ActiveCntStatVo">
+        <result column="day_id" jdbcType="VARCHAR" property="dayId"/>
+        <result column="active_cnt" jdbcType="INTEGER" property="activeCnt"/>
+    </resultMap>
+    <select id="getActUserGroupByDay" resultMap="activeUserCntVoResultMap">
+        select day_id,count(*) active_cnt
+        from (select day_id,account_id
+        from t_m_visit_log
+        where create_time  <![CDATA[ >= ]]> #{startDay} and create_time <![CDATA[ < ]]> #{endDay}
+        group by account_id,day_id order by day_id desc ) a
+        group by day_id order by day_id
+   </select>
+</mapper>

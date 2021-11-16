@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.gy.dao.TMAccountMapper">
+    <resultMap id="BaseResultMap" type="cn.gy.bean.TMAccount">
+        <!--
+          WARNING - @mbg.generated
+        -->
+        <id column="account_id" jdbcType="BIGINT" property="accountId"/>
+        <result column="account_name" jdbcType="VARCHAR" property="accountName"/>
+        <result column="account_type" jdbcType="TINYINT" property="accountType"/>
+        <result column="role_id" jdbcType="BIGINT" property="roleId"/>
+        <result column="role_name" jdbcType="VARCHAR" property="roleName"/>
+        <result column="password" jdbcType="VARCHAR" property="password"/>
+        <result column="salt" jdbcType="VARCHAR" property="salt"/>
+        <result column="customer_id" jdbcType="BIGINT" property="customerId"/>
+        <result column="customer_name" jdbcType="VARCHAR" property="customerName"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="last_login_time" jdbcType="TIMESTAMP" property="lastLoginTime"/>
+        <result column="if_reset_passwd" jdbcType="INTEGER" property="ifResetPasswd"/>
+        <result column="completed_guide" jdbcType="VARCHAR" property="completedGuide"/>
+    </resultMap>
+    <resultMap id="voResultMap" type="cn.gy.bean.AccountVo">
+        <!--
+          WARNING - @mbg.generated
+        -->
+        <id column="account_id" jdbcType="BIGINT" property="accountId"/>
+        <result column="account_name" jdbcType="VARCHAR" property="accountName"/>
+        <result column="account_type" jdbcType="TINYINT" property="accountType"/>
+        <result column="role_id" jdbcType="BIGINT" property="roleId"/>
+        <result column="role_name" jdbcType="VARCHAR" property="roleName"/>
+        <result column="customer_id" jdbcType="BIGINT" property="customerId"/>
+        <result column="customer_name" jdbcType="VARCHAR" property="customerName"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+    </resultMap>
+
+    <select id="getAccountList" resultMap="voResultMap">
+        select a.account_id, a.account_name, a.account_type,
+        a.role_id, a.role_name, a.customer_id, a.customer_name,a.create_time
+        from t_m_account a
+        <where>
+            <if test="accountType != null and accountType.length() > 0">a.status=#{accountType, jdbcType=VARCHAR}</if>
+            <if test="accountId != null ">and a.account_id = #{accountId, jdbcType=BIGINT}
+            </if>
+            <if test="customerId != null ">and a.customer_id=#{customerId, jdbcType=BIGINT}
+            </if>
+            <if test="roleName != null and roleName.length() > 0">and a.role_name like concat('%',
+                #{roleName, jdbcType=VARCHAR}, '%')
+            </if>
+        </where>
+        ORDER BY a.account_type, a.customer_name desc, a.account_name
+    </select>
+
+    <update id="updateRoleNameByRoleId" >
+        update t_m_account set role_name=#{roleName}
+        where role_id=#{roleId}
+    </update>
+
+    <update id="updateCustomerName" >
+        update t_m_account set customer_name=#{customerName}
+        where customer_id=#{customerId}
+    </update>
+    <select id="getAllUserGroupByDay" resultType="java.lang.Integer">
+        select count(*)
+        from (select account_id
+              from t_m_account
+              where create_time <![CDATA[ < ]]> #{endDay}
+             ) as a
+    </select>
+</mapper>

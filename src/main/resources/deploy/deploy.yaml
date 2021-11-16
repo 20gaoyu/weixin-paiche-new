@@ -1,0 +1,157 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  # 部署名称
+  name: cdn-log-config-rest
+  # 所属命名空间-必填
+  namespace: ${namespace}
+spec:
+  # 匹配 Pod 的 label
+  selector:
+    matchLabels:
+      app: cdn-log-config-rest
+  # 运行的副本数
+  replicas: 0
+  # 滚动升级策略
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  # 创建 Pod 的模板
+  template:
+    metadata:
+      labels:
+        # 匹配 Deployment 的 label
+        app: cdn-log-config-rest
+    spec:
+      # 使用主机网络：
+      hostNetwork: true
+      # 设置节点亲和性，保证只调度到某几个节点，以数组形式存储
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - ${hosts}
+      containers:
+        # 定义该 Pod 内的容器，因为可以一个 Pod 允许有多个容器，因此是一个数组
+        - image: harbor.ctyuncdn.cn/cdn-log/rest/cdn-log-config-rest:${tag}
+          imagePullPolicy: Always
+          # 这个名称是否必须？
+          name: cdn-log-config-rest
+          # stdin 是啥意思？
+          stdin: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          tty: true
+          # 资源限制
+          resources:
+            limits:
+              memory: 2Gi
+            requests:
+              memory: 256Mi
+          # 传入参数
+          # args: ${args}
+          # 配置环境变量
+          env:
+            - name: ENV
+              value: ${env}
+            - name: APOLLO_META
+              value: ${apollo_meta}
+            - name: LANG
+              value: en_US.utf8
+            - name: HDP_VERSION
+              value: 3.1.0.0-78
+            - name: APP_ID
+              value: cdn-log
+            - name: MYSQL_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: cluster-secret
+                  key: mysql.username
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cluster-secret
+                  key: mysql.password
+          # 配置挂载路径
+          volumeMounts:
+            - name: usr-hdp
+              mountPath: /usr/hdp/3.1.0.0-78/
+              readOnly: true
+            - name: etc-hbase
+              mountPath: /etc/hbase/3.1.0.0-78/0/
+              readOnly: true
+            - name: etc-hdp
+              mountPath: /etc/hadoop/3.1.0.0-78/0/
+              readOnly: true
+            - name: etc-spark
+              mountPath: /etc/spark2/3.1.0.0-78/0/
+              readOnly: true
+            - name: etc-hive
+              mountPath: /etc/hive/3.1.0.0-78/0/
+              readOnly: true
+            - name: etc-hosts
+              mountPath: /etc/hosts
+              readOnly: true
+            - name: etc-cdnlog
+              mountPath: /etc/cdnlog
+              readOnly: true
+            - name: cdnlog-keytab
+              mountPath: /etc/security/keytabs/cdnlog.keytab
+              readOnly: true
+            - name: krb5-conf
+              mountPath: /etc/krb5.conf
+              readOnly: true
+          # 设置端口映射 hostPort 仅部署主机 ，而 nodePort 可以在任意一个节点访问（但是有端口限制30000-32768）
+          # ${portsSetting}
+      # 需要指定镜像源的认证信息
+      # imagePullSecrets:
+      #   - name: cdnlog-harbor
+      # 配置主机上的目录，type为 Directory 会要求主机上必须存在该目录
+      volumes:
+        - name: usr-hdp
+          hostPath:
+            path: /usr/hdp/3.1.0.0-78/
+            type: Directory
+        - name: etc-hbase
+          hostPath:
+            path: /etc/hbase/3.1.0.0-78/0/
+            type: Directory
+        - name: etc-hdp
+          hostPath:
+            path: /etc/hadoop/3.1.0.0-78/0/
+            type: Directory
+        - name: etc-spark
+          hostPath:
+            path: /etc/spark2/3.1.0.0-78/0/
+            type: Directory
+        - name: etc-hive
+          hostPath:
+            path: /etc/hive/3.1.0.0-78/0/
+            type: Directory
+        - name: etc-hosts
+          hostPath:
+            path: /etc/hosts
+            type: File
+        - name: etc-cdnlog
+          hostPath:
+            path: /etc/cdnlog
+            type: Directory
+        - name: cdnlog-keytab
+          hostPath:
+            path: /etc/security/keytabs/cdnlog.keytab
+            type: File
+        - name: krb5-conf
+          hostPath:
+            path: /etc/krb5.conf
+            type: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext:
+      terminationGracePeriodSeconds: 30

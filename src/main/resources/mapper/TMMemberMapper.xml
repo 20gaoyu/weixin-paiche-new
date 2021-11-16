@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.gy.dao.TMMemberMapper">
+    <resultMap id="BaseResultMap" type="cn.gy.bean.Member">
+        <!--
+          WARNING - @mbg.generated
+        -->
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="account_name" jdbcType="VARCHAR" property="accountName"/>
+        <result column="job_number" jdbcType="BIGINT" property="jobNumber"/>
+        <result column="sex" jdbcType="VARCHAR" property="sex"/>
+        <result column="telephone" jdbcType="VARCHAR" property="telephone"/>
+        <result column="email" jdbcType="VARCHAR" property="email"/>
+        <result column="department_id" jdbcType="BIGINT" property="departmentId"/>
+        <result column="department_name" jdbcType="VARCHAR" property="departmentName"/>
+        <result column="position" jdbcType="VARCHAR" property="position"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="last_login_time" jdbcType="TIMESTAMP" property="lastLoginTime"/>
+        <result column="open_id" jdbcType="VARCHAR" property="openId"/>
+    </resultMap>
+
+    <select id="getList" resultMap="BaseResultMap">
+        select a.id, a.account_name, a.job_number,
+        a.sex, a.email,a.telephone, a.department_id, a.department_name,a.position,a.create_time,a.open_id,a.last_login_time
+        from t_m_member a
+        <where>
+            <if test="name != null and name.length() > 0">  a.account_name like concat('%',
+                #{name, jdbcType=VARCHAR}, '%')
+            </if>
+        </where>
+        ORDER BY a.account_name
+    </select>
+
+    <update id="updateRoleNameByRoleId" >
+        update t_m_member set role_name=#{roleName}
+        where role_id=#{roleId}
+    </update>
+
+    <update id="updateCustomerName" >
+        update t_m_member set department_name=#{departmentId}
+        where department_id=#{departmentName}
+    </update>
+
+</mapper>

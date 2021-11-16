@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.gy.dao.TMCarMapper">
+    <resultMap id="BaseResultMap" type="cn.gy.bean.Car">
+        <!--
+          WARNING - @mbg.generated
+        -->
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="license" jdbcType="VARCHAR" property="license"/>
+        <result column="brand" jdbcType="VARCHAR" property="brand"/>
+        <result column="type" jdbcType="VARCHAR" property="type"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="mileage" jdbcType="INTEGER" property="mileage"/>
+    </resultMap>
+
+    <select id="getList" resultMap="BaseResultMap">
+        select a.id, a.license,
+        a.brand, a.type, a.create_time, a.mileage
+        from t_m_car a
+        <where>
+            <if test="license != null and license.length() > 0">  a.license like concat('%',
+                #{license, jdbcType=VARCHAR}, '%')
+            </if>
+        </where>
+        ORDER BY a.license
+    </select>
+
+</mapper>

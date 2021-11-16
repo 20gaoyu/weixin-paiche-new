@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.gy.dao.TMMenuMapper">
+  <resultMap id="BaseResultMap" type="cn.gy.bean.TMMenu">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="menu_id" jdbcType="INTEGER" property="menuId" />
+    <result column="menu_name" jdbcType="VARCHAR" property="menuName" />
+    <result column="menu_type" jdbcType="TINYINT" property="menuType" />
+    <result column="parent_id" jdbcType="INTEGER" property="parentId" />
+    <result column="menu_order" jdbcType="INTEGER" property="menuOrder" />
+    <result column="if_show" jdbcType="TINYINT" property="ifShow" />
+    <result column="url" jdbcType="VARCHAR" property="url" />
+    <result column="method" jdbcType="VARCHAR" property="method" />
+    <result column="operation" jdbcType="INTEGER" property="operation" />
+    <result column="creator" jdbcType="VARCHAR" property="creator" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+  </resultMap>
+
+  <select id="findMenuByRole" resultMap="BaseResultMap">
+        select *
+        from t_m_menu a
+        where exists(select 1 from t_m_role_menu b where exists (select 1 from t_m_role c where c.role_id = b.role_id
+        										and c.role_id = #{roleId} and c.category != 0)
+        and b.menu_id = a.menu_id)
+    </select>
+
+</mapper>

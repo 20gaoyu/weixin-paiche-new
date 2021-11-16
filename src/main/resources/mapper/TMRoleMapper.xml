@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.gy.dao.TMRoleMapper">
+  <resultMap id="BaseResultMap" type="cn.gy.bean.TMRole">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="role_id" jdbcType="BIGINT" property="roleId" />
+    <result column="role_name" jdbcType="VARCHAR" property="roleName" />
+    <result column="category" jdbcType="INTEGER" property="category" />
+    <result column="creator" jdbcType="VARCHAR" property="creator" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="updator" jdbcType="VARCHAR" property="updator" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+  </resultMap>
+  
+  <resultMap id="voResultMap" type="cn.gy.bean.RoleVo">
+    <id column="role_id" jdbcType="BIGINT" property="roleId" />
+    <result column="role_name" jdbcType="VARCHAR" property="roleName" />
+    <result column="category" jdbcType="INTEGER" property="category" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+  </resultMap>
+  
+  <update id="updateStatusById" >
+        update t_m_role set category = 0
+        where role_id=#{roleId}
+  </update>
+  
+  <select id="getRoleList" resultMap="voResultMap">
+        select a.role_id, a.role_name, a.category, a.create_time
+        from t_m_role a
+        <where>
+            <if test="qCategory != null and qCategory.length > 0">a.category in
+                <foreach collection="qCategory" item="id" index="index" open="(" close=")" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+            <if test="qName != null and qName.length() > 0">and a.role_name like concat('%',
+                #{qName, jdbcType=VARCHAR}, '%')
+            </if>
+        </where>
+        ORDER BY a.category desc, a.role_name
+  </select>
+  
+</mapper>

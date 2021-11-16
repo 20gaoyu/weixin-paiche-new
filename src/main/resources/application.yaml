@@ -1,0 +1,37 @@
+server:
+  port: 28452
+channel:
+  attribute:
+    table: test
+
+spring:
+  datasource:
+    username: admin
+    password: admin@123
+    url: jdbc:mysql://81.71.83.14:3506/paiche?useSSL=false&allowMultiQueries=true&useUnicode=true&characterEncoding=utf-8
+    #url: jdbc:mysql://address=(protocol=tcp)(host=::1)(port=8306)/hbase?useSSL=false&amp;useUnicode=true&amp;characterEncoding=utf-8
+    driver-class-name: com.mysql.jdbc.Driver
+    druid:
+      filter:
+        stat:
+          db-type: mysql
+          log-slow-sql: true
+          slow-sql-millis: 5000
+        wall:
+          config:
+            delete-allow: true
+            drop-table-allow: false
+            multi-statement-allow: true
+          db-type: mysql
+          enabled: true
+      stat-view-servlet:
+        allow: 127.0.0.1
+        enabled: true
+        login-password: admin
+        login-username: admin
+        reset-enable: false
+        url-pattern: /druid/*
+      web-stat-filter:
+        enabled: true
+        exclusions: '*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*'
+        url-pattern: /*
