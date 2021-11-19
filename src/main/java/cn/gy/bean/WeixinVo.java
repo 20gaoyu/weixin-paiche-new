@@ -18,5 +18,4 @@ public class WeixinVo {
     private String code;
     private String department;
     private String telephone;
-    private String name;
 }

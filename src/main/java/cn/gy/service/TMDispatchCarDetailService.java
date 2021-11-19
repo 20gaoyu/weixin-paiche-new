@@ -32,6 +32,8 @@ public class TMDispatchCarDetailService extends AbstractService<DispatchCarDetai
 		return tmDispatchCarDetailMapper.getList(name);
 	}
 
+
+
 	public Result<String> add(DispatchCarDetail dispatchCarDetail)
 	{
 		this.save(dispatchCarDetail);
@@ -56,16 +58,11 @@ public class TMDispatchCarDetailService extends AbstractService<DispatchCarDetai
 
 	}
 
-
-	public List<DispatchCarDetail> getAccountNameByLike(String applicant,String status) {
+	public List<DispatchCarDetail> getListByAudit(String name,String field) {
 		Condition condition = new Condition(TMAccount.class);
+		condition.setOrderByClause("create_time");
 		Condition.Criteria criteria = condition.createCriteria();
-		if(StringUtils.isNotBlank(applicant)) {
-			criteria.andEqualTo("applicant", applicant);
-		}
-		if(StringUtils.isNotBlank(status)) {
-			criteria.andEqualTo("status", status);
-		}
+		criteria.andEqualTo(field, name);
 		List<DispatchCarDetail> instList = tmDispatchCarDetailMapper.selectByCondition(condition);
 		return instList;
 	}

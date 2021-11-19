@@ -17,32 +17,32 @@ public class DispatchCarDetail {
     @Id
     @NotNull(groups = {Update.class}, message = "id不能为空")
     @Column(name = "id")
-    private  Long id;
+    protected   Long id;
     @Column(name = "applicant")
-    private  String applicant;
+    protected  String applicant;
     @Column(name = "user")
-    private  String user;
+    protected  String user;
     @JsonFormat(locale = "zh", timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
     @Column(name = "start_time")
-    private  Date startTime;
+    protected  Date startTime;
     @JsonFormat(locale = "zh", timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
     @Column(name = "end_time")
-    private  Date endTime;
+    protected  Date endTime;
     @Column(name = "if_comment")
-    private  String ifComment;
+    protected  String ifComment;
     @Column(name = "use_reason")
-    private  String useReason;
+    protected  String useReason;
     @Column(name = "destination")
-    private  String destination;
+    protected  String destination;
     @Column(name = "one_audit")
-    private  String oneAudit;
+    protected  String oneAudit;
     @Column(name = "two_audit")
-    private  String twoAudit;
+    protected  String twoAudit;
     @Column(name = "status")
-    private  String status;
+    protected  String status;
     @Column(name = "operation")
-    private  String operation;
+    protected  String operation;
     @JsonFormat(locale = "zh", timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
     @Column(name = "create_time")
-    private  Date createTime;
+    protected  Date createTime;
 }

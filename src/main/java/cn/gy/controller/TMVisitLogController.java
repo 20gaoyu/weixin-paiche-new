@@ -6,6 +6,7 @@ import cn.gy.bean.TMVisitLog;
 import cn.gy.bean.VisitLogVo;
 import cn.gy.core.web.Result;
 import cn.gy.core.web.ResultGenerator;
+import cn.gy.service.TMVisitLogService;
 import cn.gy.util.EnvUtil;
 import cn.gy.util.IPUtil;
 import cn.gy.util.InterceptParmUtil;

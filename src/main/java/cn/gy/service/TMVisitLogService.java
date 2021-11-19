@@ -1,4 +1,4 @@
-package cn.gy.controller;
+package cn.gy.service;
 
 import cn.gy.bean.ActiveCntStatVo;
 import cn.gy.bean.TMVisitLog;

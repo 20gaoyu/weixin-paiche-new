@@ -66,14 +66,14 @@ public class TMMemberService extends AbstractService<Member> {
 			return list.get(0);
 		}
 	}
-	public boolean findByOenId(String openid){
+	public Member findByOenId(String openid){
 		Condition condition = new Condition(Member.class);
 		condition.createCriteria().andEqualTo("openId", openid);
 		List<Member> list = findByCondition(condition);
 		if(list.isEmpty()){
-			return false;
+			return null;
 		}else{
-			return true;
+			return list.get(0);
 		}
 	}
 	public Result updateMember(Member member) {
@@ -87,6 +87,18 @@ public class TMMemberService extends AbstractService<Member> {
 
 	}
 
+	public Member getMember(String departmentName,String position) {
+		Condition condition = new Condition(TMAccount.class);
+		Condition.Criteria criteria = condition.createCriteria();
+		criteria.andEqualTo("departmentName", departmentName);
+		criteria.andLike("position", position);
+		List<Member> instList = tmMemberMapper.selectByCondition(condition);
+		if(instList.isEmpty()){
+			return null;
+		}else{
+			return instList.get(0);
+		}
+	}
 
 	public List<Member> getAccountNameByLike(String accountName,String departmentName) {
 		Condition condition = new Condition(TMAccount.class);
