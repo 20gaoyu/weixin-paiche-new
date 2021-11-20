@@ -88,7 +88,7 @@ public class TMMemberService extends AbstractService<Member> {
 	}
 
 	public Member getMember(String departmentName,String position) {
-		Condition condition = new Condition(TMAccount.class);
+		Condition condition = new Condition(Member.class);
 		Condition.Criteria criteria = condition.createCriteria();
 		criteria.andEqualTo("departmentName", departmentName);
 		criteria.andLike("position", position);

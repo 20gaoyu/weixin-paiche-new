@@ -42,6 +42,8 @@ public class DispatchCarDetail {
     protected  String status;
     @Column(name = "operation")
     protected  String operation;
+    @Column(name = "cancel_reason")
+    protected  String cancelReason;
     @JsonFormat(locale = "zh", timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
     @Column(name = "create_time")
     protected  Date createTime;

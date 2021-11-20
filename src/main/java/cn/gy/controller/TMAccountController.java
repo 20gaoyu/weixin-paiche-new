@@ -175,30 +175,46 @@ public class TMAccountController {
             if(openid==null||"".equals(openid)){
                     return ResultGenerator.genFailResult(ResultCode.UNAUTHORIZED,"填写号码注册");
             }else{
-                List<DispatchCarDetail> list=new ArrayList<>();
-                if(PositionEnum.WORKER.getName().equals(member.getPosition())){
-                     list = tmDispatchCarDetailService.getListByAudit("applicant",member.getAccountName());
-                }else if(PositionEnum.AUDITD_IRECTOR.getName().equals(member.getPosition())){
-                     list = tmDispatchCarDetailService.getListByAudit("oneAudit",member.getAccountName());
-                }else if(PositionEnum.AUDITD_SCHEDULING.getName().equals(member.getPosition())){
-                    list = tmDispatchCarDetailService.getListByAudit("twoAudit",member.getAccountName());
-                }else{
-
-                }
+                List<DispatchCarDetail> list = tmDispatchCarDetailService.getListByAudit("applicant",member.getAccountName());
+//                }else if(PositionEnum.AUDITD_IRECTOR.getName().equals(member.getPosition())){
+//                     list = tmDispatchCarDetailService.getListByAudit("oneAudit",member.getAccountName());
+//                }else if(PositionEnum.AUDITD_SCHEDULING.getName().equals(member.getPosition())){
+//                    list = tmDispatchCarDetailService.getListByAudit("twoAudit",member.getAccountName());
+//                }else{
+//
+//                }
                 return ResultGenerator.genSuccessResult(list);
               }
         }else{
             return ResultGenerator.genFailResult(ResultCode.UNAUTHORIZED,"填写号码注册");
         }
     }
+    @PostMapping("/wxcommentquery")
+    public Result wxCommentQuery(@RequestBody Member member) {
+        log.info("小程序登录后获取自己详单记录:{}",member);
+        if (member != null) {
+            // 获取用户的唯一标识openid
+            String openid = member.getOpenId();
+            // 获取用户的唯一标识unionid
+            // 下面就可以写自己的业务代码了
+            if(openid==null||"".equals(openid)){
+                return ResultGenerator.genFailResult(ResultCode.UNAUTHORIZED,"填写号码注册");
+            }else{
 
+                List<DispatchCarDetail>  list = tmDispatchCarDetailService.getListByNocomment("applicant",member.getAccountName());
+                return ResultGenerator.genSuccessResult(list);
+            }
+        }else{
+            return ResultGenerator.genFailResult(ResultCode.UNAUTHORIZED,"填写号码注册");
+        }
+    }
     @PostMapping("/wxsubmit")
     public Result wxquery(@RequestBody DispatchCarDetailVo dispatchCarDetail) {
         log.info("小程序登录后提交申请记录:{}",dispatchCarDetail);
 
         if (dispatchCarDetail != null) {
             // 下面就可以写自己的业务代码了
-            Member member = tmMemberService.getMember(dispatchCarDetail.getDepartment(), PositionEnum.AUDITD_IRECTOR.getName());
+            Member member = tmMemberService.getMember(dispatchCarDetail.getDepartmentName(), PositionEnum.AUDITD_IRECTOR.getName());
             if(member==null){
                 return ResultGenerator.genFailResult(ResultCode.UNAUTHORIZED,"填写号码注册");
             }else{
@@ -225,7 +241,7 @@ public class TMAccountController {
                 weChat.sendWeChatMsgText("", "2", "", "微信测试"+"驳回", "0");
                 return ResultGenerator.genSuccessResult("审批成功");
             }
-            Member member = tmMemberService.getMember(dispatchCarDetail.getDepartment(), PositionEnum.AUDITD_SCHEDULING.getName());
+            Member member = tmMemberService.getMember(dispatchCarDetail.getDepartmentName(), PositionEnum.AUDITD_SCHEDULING.getName());
             if(member==null){
                 return ResultGenerator.genFailResult(ResultCode.UNAUTHORIZED,"没有对应调度");
             }else{
@@ -236,7 +252,7 @@ public class TMAccountController {
                     weChat.sendWeChatMsgText("", "2", "", "微信测试"+dispatchCarDetail.getTwoAudit(), "0");
                     return ResultGenerator.genSuccessResult("审批成功");
                 }else{
-                    member = tmMemberService.getMember(dispatchCarDetail.getDepartment(), PositionEnum.DRIVER.getName());
+                    member = tmMemberService.getMember(dispatchCarDetail.getDepartmentName(), PositionEnum.DRIVER.getName());
                     if(member==null){
                         return ResultGenerator.genFailResult(ResultCode.UNAUTHORIZED,"没有驾驶员");
                     }else{

@@ -8,6 +8,6 @@ import lombok.Data;
  */
 @Data
 public class DispatchCarDetailVo extends DispatchCarDetail {
-    private String department;
+    private String departmentName;
     private String telephone;
 }

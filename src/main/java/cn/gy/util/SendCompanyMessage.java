@@ -8,6 +8,7 @@ import javax.net.ssl.HttpsURLConnection;
 
 
 import com.alibaba.fastjson.JSONObject;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.cookie.CookiePolicy;
@@ -16,11 +17,10 @@ import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.params.DefaultHttpParams;
 
 
-
 /**
  * @author cxf
  */
-
+@Slf4j
 public class SendCompanyMessage {
     // 系统properties文件名称
 //    private static final String EMAILCONFIG = "emailAndMsgConfig";
@@ -36,6 +36,8 @@ public class SendCompanyMessage {
     private final static String ACCESS_TOKEN_URL = "https://qyapi.weixin.qq.com/cgi-bin/gettoken";
     // 创建会话请求URL
     private final static String CREATE_SESSION_URL = "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=";
+
+    private final static String GET_USERID_URL = "https://qyapi.weixin.qq.com/cgi-bin/user/getuserid?access_token=";
 
     // 获取接口访问权限码
     public String getAccessToken() {
@@ -54,22 +56,18 @@ public class SendCompanyMessage {
             client.executeMethod(get);
             result = new String(get.getResponseBodyAsString().getBytes("utf-8"));
         } catch (IOException e) {
-            e.printStackTrace();
+            log.info("get tokcen result error",e);
         }
         // 将数据转换成json
-
-
         if (result == null || result == "") {
-            System.out.println("*****************");
-            System.out.println("result:null");
+            log.info("*****************");
+            log.info("result:null");
         } else {
-            System.out.println("result is not  null:" + result.toString());
+            log.info("result is not  null:" + result.toString());
             JSONObject jasonObject = JSONObject.parseObject(result);
             result = (String) jasonObject.get("access_token");
-            // System.out.println(result);
-
-            get.releaseConnection();
         }
+        get.releaseConnection();
         return result;
 
     }
@@ -113,12 +111,11 @@ public class SendCompanyMessage {
             client.executeMethod(post);
             result = new String(post.getResponseBodyAsString().getBytes("utf-8"));
         } catch (IOException e) {
-            e.printStackTrace();
+            log.info("send message fail", e);
         }
-        System.out.println(result);
+        log.info(result);
 
         post.releaseConnection();
-
         return result;
 
     }
@@ -243,9 +240,69 @@ public class SendCompanyMessage {
 
         } catch (Exception e) {
 
-            e.printStackTrace();
+            log.info("send message fail", e);
 
         }
+    }
+
+    public String getUserId(String phone) {
+        URL uRl;
+        String ACCESS_TOKEN = getAccessToken();
+        // 拼接请求串
+        String action = GET_USERID_URL + ACCESS_TOKEN;
+        // 封装发送消息请求json
+        StringBuffer sb = new StringBuffer();
+        sb.append("{");
+        sb.append("\"mobile\":" + "\"" + phone + "\"");
+        sb.append("}");
+        String json = sb.toString();
+
+        try {
+            uRl = new URL(action);
+
+            HttpsURLConnection http = (HttpsURLConnection) uRl.openConnection();
+
+            http.setRequestMethod("POST");
+
+            http.setRequestProperty("Content-Type",
+
+                    "application/json;charset=UTF-8");
+
+            http.setDoOutput(true);
+
+            http.setDoInput(true);
+
+            System.setProperty("sun.net.client.defaultConnectTimeout", "30000");//
+            // 连接超时30秒
+
+            System.setProperty("sun.net.client.defaultReadTimeout", "30000"); //
+            // 读取超时30秒
+
+            http.connect();
+
+            OutputStream os = http.getOutputStream();
+
+            os.write(json.getBytes("UTF-8"));// 传入参数
+
+            InputStream is = http.getInputStream();
+
+            int size = is.available();
+
+            byte[] jsonBytes = new byte[size];
+
+            is.read(jsonBytes);
+            String result = new String(jsonBytes, "UTF-8");
+            log.info("请求返回结果:" + result);
+            os.flush();
+            os.close();
+            JSONObject jasonObject = JSONObject.parseObject(result);
+            result = (String) jasonObject.get("userid");
+            return result;
+        } catch (Exception e) {
+            log.info("get user id fail",e);
+            return null;
+        }
+
     }
 
     /**
@@ -282,9 +339,9 @@ public class SendCompanyMessage {
         sb.append("\"debug\":" + "\"" + "1" + "\"");
         sb.append("}");
         String json = sb.toString();
-        System.out.println("==========================");
-        System.out.println(json);
-        System.out.println("==========================");
+        log.info("==========================");
+        log.info(json);
+        log.info("==========================");
         try {
 
             uRl = new URL(action);
@@ -323,7 +380,7 @@ public class SendCompanyMessage {
 
             String result = new String(jsonBytes, "UTF-8");
 
-            System.out.println("请求返回结果:" + result);
+            log.info("请求返回结果:" + result);
 
             os.flush();
 
@@ -331,7 +388,7 @@ public class SendCompanyMessage {
 
         } catch (Exception e) {
 
-            e.printStackTrace();
+            log.info("send message fail",e);
 
         }
     }
@@ -339,6 +396,7 @@ public class SendCompanyMessage {
     public static void main(String[] args) {
         SendCompanyMessage weChat = new SendCompanyMessage();
         weChat.sendWeChatMsgText("", "2", "", "微信测试", "0");
+        weChat.getUserId("13510186268");
         // weChat.sendWeChatMsg("text", "mxlydx", "4", "", "测试senMsg", "", "",
         // "", "", "", "0");
         // weChat.sendWeChatMessage("mxlydq", "2", "", "Hi");

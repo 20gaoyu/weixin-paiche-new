@@ -3,6 +3,7 @@ package cn.gy.service;
 import cn.gy.bean.DispatchCarDetail;
 import cn.gy.bean.Member;
 import cn.gy.bean.TMAccount;
+import cn.gy.constant.AuditStatusEnum;
 import cn.gy.core.service.AbstractService;
 import cn.gy.core.web.Result;
 import cn.gy.core.web.ResultGenerator;
@@ -58,11 +59,20 @@ public class TMDispatchCarDetailService extends AbstractService<DispatchCarDetai
 
 	}
 
-	public List<DispatchCarDetail> getListByAudit(String name,String field) {
-		Condition condition = new Condition(TMAccount.class);
-		condition.setOrderByClause("create_time");
+	public List<DispatchCarDetail> getListByAudit(String field,String name) {
+		Condition condition = new Condition(DispatchCarDetail.class);
+		condition.setOrderByClause("create_time desc limit 10");
 		Condition.Criteria criteria = condition.createCriteria();
-		criteria.andEqualTo(field, name);
+		criteria.andEqualTo(field,name);
+		List<DispatchCarDetail> instList = tmDispatchCarDetailMapper.selectByCondition(condition);
+		return instList;
+	}
+	public List<DispatchCarDetail> getListByNocomment(String field,String name) {
+		Condition condition = new Condition(DispatchCarDetail.class);
+		condition.setOrderByClause("create_time desc limit 10");
+		Condition.Criteria criteria = condition.createCriteria();
+		criteria.andEqualTo(field, name).andEqualTo("status", AuditStatusEnum.COMPLETE.getName())
+				.andCondition("if_comment is null or if_comment ='' ");
 		List<DispatchCarDetail> instList = tmDispatchCarDetailMapper.selectByCondition(condition);
 		return instList;
 	}
