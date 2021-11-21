@@ -15,12 +15,14 @@ import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.params.DefaultHttpParams;
+import org.springframework.stereotype.Component;
 
 
 /**
  * @author cxf
  */
 @Slf4j
+@Component
 public class SendCompanyMessage {
     // 系统properties文件名称
 //    private static final String EMAILCONFIG = "emailAndMsgConfig";

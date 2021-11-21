@@ -48,10 +48,10 @@ public class TMMemberController {
 
     @GetMapping("/member/query")
     public Result<PageInfoVo<Member>> list(@RequestParam(defaultValue = "1") Integer page, @RequestParam(defaultValue = "10") Integer size,
-                                              @RequestParam(required = false) String memberName) {
-        log.info(" query start {}",memberName);
+                                              @RequestParam(required = false) String name) {
+        log.info(" query start {}",name);
         PageHelper.startPage(page, size);
-        List<Member> list = tmMemberService.getList(memberName);
+        List<Member> list = tmMemberService.getList(name);
         PageInfo<Member> pageInfo = new PageInfo<>(list);
         return ResultGenerator.genSuccessResult(
                 new PageInfoVo<>(pageInfo.getList(), pageInfo.getTotal()));

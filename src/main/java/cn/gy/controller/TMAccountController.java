@@ -8,11 +8,7 @@ import cn.gy.constant.AuditStatusEnum;
 import cn.gy.core.web.Result;
 import cn.gy.core.web.ResultCode;
 import cn.gy.core.web.ResultGenerator;
-import cn.gy.service.TMAccountService;
-import cn.gy.service.TMCustomerService;
-import cn.gy.service.TMDispatchCarDetailService;
-import cn.gy.service.TMMemberService;
-import cn.gy.service.TMMenuService;
+import cn.gy.service.*;
 import cn.gy.util.DigestUtil;
 import cn.gy.util.EnvUtil;
 import cn.gy.util.MiniprogramUtil;
@@ -65,7 +61,10 @@ public class TMAccountController {
     private TMMemberService tmMemberService;
     @Resource
     private TMDispatchCarDetailService tmDispatchCarDetailService;
-
+    @Resource
+    private TMDepartmentService tmDepartmentService;
+    @Resource
+    private SendCompanyMessage sendCompanyMessage;
     @ApiOperation(value = "登录")
     //@AlwaysAllowAccess
     @GetMapping("/login")
@@ -214,58 +213,114 @@ public class TMAccountController {
 
         if (dispatchCarDetail != null) {
             // 下面就可以写自己的业务代码了
-            Member member = tmMemberService.getMember(dispatchCarDetail.getDepartmentName(), PositionEnum.AUDITD_IRECTOR.getName());
-            if(member==null){
-                return ResultGenerator.genFailResult(ResultCode.UNAUTHORIZED,"填写号码注册");
+            List<Department> list = tmDepartmentService.getList(dispatchCarDetail.getDepartmentName());
+
+            if(list.isEmpty()){
+                return ResultGenerator.genFailResult(ResultCode.UNAUTHORIZED,"部门错误");
+            }
+            Department department=list.get(0);
+            List<Member> memberList;
+            if(department.getParentId()==1){
+                memberList= tmMemberService.getMember("办公室", PositionEnum.AUDITD_IRECTOR.getName());
+            }else{
+                memberList = tmMemberService.getMember(dispatchCarDetail.getDepartmentName(), PositionEnum.AUDITD_IRECTOR.getName());
+            }
+            if(memberList.isEmpty()){
+                return ResultGenerator.genFailResult(ResultCode.UNAUTHORIZED,"部门没有审核员");
             }else{
                 dispatchCarDetail.setStatus(AuditStatusEnum.AUDITDING.getName());
-                dispatchCarDetail.setOneAudit(member.getAccountName());
+                dispatchCarDetail.setOneAudit(memberList.get(0).getAccountName());
                 tmDispatchCarDetailService.add(dispatchCarDetail);
-                SendCompanyMessage weChat = new SendCompanyMessage();
-                weChat.sendWeChatMsgText("", "2", "", "微信测试"+dispatchCarDetail.getOneAudit(), "0");
-                return ResultGenerator.genSuccessResult("提交成功");
-            }
-        }else{
-            return ResultGenerator.genFailResult(ResultCode.UNAUTHORIZED,"填写号码注册");
-        }
-    }
-    @PostMapping("/wxaudit")
-    public Result wxaudit(@RequestBody DispatchCarDetailVo dispatchCarDetail) {
-        log.info("小程序登录后审批记录:{}",dispatchCarDetail);
-        SendCompanyMessage weChat = new SendCompanyMessage();
-        if (dispatchCarDetail != null) {
-            // 下面就可以写自己的业务代码了
-            if(dispatchCarDetail.getIfComment()!=null||!"".equals(dispatchCarDetail.getIfComment())){
-                dispatchCarDetail.setStatus(AuditStatusEnum.CANCLE.getName());
-                tmDispatchCarDetailService.updateDetail(dispatchCarDetail);
-                weChat.sendWeChatMsgText("", "2", "", "微信测试"+"驳回", "0");
-                return ResultGenerator.genSuccessResult("审批成功");
-            }
-            Member member = tmMemberService.getMember(dispatchCarDetail.getDepartmentName(), PositionEnum.AUDITD_SCHEDULING.getName());
-            if(member==null){
-                return ResultGenerator.genFailResult(ResultCode.UNAUTHORIZED,"没有对应调度");
-            }else{
-                if(dispatchCarDetail.getTwoAudit()==null){
-                    dispatchCarDetail.setTwoAudit(member.getAccountName());
-                    dispatchCarDetail.setStatus(AuditStatusEnum.SCHEDULING.getName());
-                    tmDispatchCarDetailService.updateDetail(dispatchCarDetail);
-                    weChat.sendWeChatMsgText("", "2", "", "微信测试"+dispatchCarDetail.getTwoAudit(), "0");
-                    return ResultGenerator.genSuccessResult("审批成功");
+                String userId=sendCompanyMessage.getUserId(memberList.get(0).getTelephone());
+                if(userId!=null){
+                    sendCompanyMessage.sendWeChatMsgText("", "2", "", "微信测试"+dispatchCarDetail.getOneAudit(), "0");
+                    return ResultGenerator.genSuccessResult("提交成功");
                 }else{
-                    member = tmMemberService.getMember(dispatchCarDetail.getDepartmentName(), PositionEnum.DRIVER.getName());
-                    if(member==null){
-                        return ResultGenerator.genFailResult(ResultCode.UNAUTHORIZED,"没有驾驶员");
-                    }else{
-                        dispatchCarDetail.setStatus(AuditStatusEnum.COMPLETE.getName());
-                        tmDispatchCarDetailService.updateDetail(dispatchCarDetail);
-                        weChat.sendWeChatMsgText("", "2", "", "微信测试"+dispatchCarDetail.getTwoAudit(), "0");
-                        return ResultGenerator.genSuccessResult("审批成功");
-                    }
+                    return ResultGenerator.genFailResult("审核人未加入企业微信");
                 }
 
             }
         }else{
             return ResultGenerator.genFailResult(ResultCode.UNAUTHORIZED,"填写号码注册");
+        }
+    }
+    @GetMapping("/wxquerydriver")
+    public Result wxQueryDriver(@RequestParam(defaultValue = "") String departmentName) {
+        log.info("小程序获取司机:{}",departmentName);
+        if (departmentName != null&&!"".equals(departmentName)) {
+            // 下面就可以写自己的业务代码了
+            List<Department> list = tmDepartmentService.getList(departmentName);
+
+            if(list.isEmpty()){
+                return ResultGenerator.genFailResult(ResultCode.UNAUTHORIZED,"没有对应部门"+departmentName);
+            }
+            Department department=list.get(0);
+            List<Member> memberList;
+            if(department.getParentId()==1){
+                memberList= tmMemberService.getMember("办公室", PositionEnum.DRIVER.getName());
+            }else{
+                memberList = tmMemberService.getMember(departmentName, PositionEnum.DRIVER.getName());
+            }
+            if(memberList.isEmpty()){
+                return ResultGenerator.genFailResult(ResultCode.UNAUTHORIZED,"部门没有驾驶员");
+            }else{
+                return ResultGenerator.genSuccessResult(memberList);
+            }
+        }else{
+            return ResultGenerator.genFailResult(ResultCode.UNAUTHORIZED,"未填写部门");
+        }
+    }
+    @PostMapping("/wxaudit")
+    public Result wxaudit(@RequestBody DispatchCarDetailVo dispatchCarDetail) {
+        log.info("小程序审批记录:{}",dispatchCarDetail);
+        if (dispatchCarDetail != null) {
+            // 下面就可以写自己的业务代码了
+            if(dispatchCarDetail.getCancelReason()!=null||!"".equals(dispatchCarDetail.getCancelReason())){
+                dispatchCarDetail.setStatus(AuditStatusEnum.CANCLE.getName());
+                tmDispatchCarDetailService.updateDetail(dispatchCarDetail);
+                return ResultGenerator.genSuccessResult("审批成功");
+            }
+            if(dispatchCarDetail.getTwoAudit()==null){
+                List<Department> list = tmDepartmentService.getList(dispatchCarDetail.getDepartmentName());
+                if(list.isEmpty()){
+                    return ResultGenerator.genFailResult(ResultCode.UNAUTHORIZED,"没有对应部门"+dispatchCarDetail.getDepartmentName());
+                }
+                Department department=list.get(0);
+                List<Member> memberList;
+                if(department.getParentId()==1){
+                    memberList= tmMemberService.getMember("办公室", PositionEnum.AUDITD_SCHEDULING.getName());
+                }else{
+                    memberList = tmMemberService.getMember(dispatchCarDetail.getDepartmentName(), PositionEnum.AUDITD_SCHEDULING.getName());
+                }
+                if(memberList.isEmpty()){
+                    return ResultGenerator.genFailResult(ResultCode.UNAUTHORIZED,"没有对应调度");
+                }else{
+                dispatchCarDetail.setTwoAudit(memberList.get(0).getAccountName());
+                dispatchCarDetail.setStatus(AuditStatusEnum.SCHEDULING.getName());
+                tmDispatchCarDetailService.updateDetail(dispatchCarDetail);
+                String userId=sendCompanyMessage.getUserId(memberList.get(0).getTelephone());
+                if(userId!=null){
+                    sendCompanyMessage.sendWeChatMsgText("", "2", "", "微信测试"+dispatchCarDetail.getOneAudit(), "0");
+                    return ResultGenerator.genSuccessResult("提交成功");
+                }else{
+                    return ResultGenerator.genFailResult("调度人未加入企业微信");
+                }}
+            }else{
+                Member driver = tmMemberService.findById(dispatchCarDetail.getDriverId());
+                String userId=sendCompanyMessage.getUserId(driver.getTelephone());
+                if(userId!=null){
+                    sendCompanyMessage.sendWeChatMsgText("", "2", "", "微信测试"+dispatchCarDetail.getOneAudit(), "0");
+                    dispatchCarDetail.setStatus(AuditStatusEnum.COMPLETE.getName());
+                    tmDispatchCarDetailService.updateDetail(dispatchCarDetail);
+                    sendCompanyMessage.sendWeChatMsgText("", "2", "", "微信测试"+dispatchCarDetail.getTwoAudit(), "0");
+                    return ResultGenerator.genSuccessResult("审批成功");
+                }else{
+                    return ResultGenerator.genFailResult("司机未加入企业微信");
+                }
+            }
+
+        }else{
+            return ResultGenerator.genFailResult(ResultCode.UNAUTHORIZED,"提交数据为空");
         }
     }
     @ApiOperation(value = "退出")
