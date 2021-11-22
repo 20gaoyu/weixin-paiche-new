@@ -67,6 +67,9 @@ public class TMMemberService extends AbstractService<Member> {
 		}
 	}
 	public Member findByOenId(String openid){
+		if(openid==null){
+			openid="";
+		}
 		Condition condition = new Condition(Member.class);
 		condition.createCriteria().andEqualTo("openId", openid);
 		List<Member> list = findByCondition(condition);
@@ -91,7 +94,7 @@ public class TMMemberService extends AbstractService<Member> {
 		Condition condition = new Condition(Member.class);
 		Condition.Criteria criteria = condition.createCriteria();
 		criteria.andEqualTo("departmentName", departmentName);
-		criteria.andLike("position", position);
+		criteria.andEqualTo("position", position);
 		List<Member> instList = tmMemberMapper.selectByCondition(condition);
 		return instList;
 	}

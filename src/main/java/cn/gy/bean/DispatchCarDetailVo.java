@@ -8,7 +8,5 @@ import lombok.Data;
  */
 @Data
 public class DispatchCarDetailVo extends DispatchCarDetail {
-    private String departmentName;
-    private String telephone;
     private Long driverId;
 }

@@ -47,4 +47,8 @@ public class DispatchCarDetail {
     @JsonFormat(locale = "zh", timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
     @Column(name = "create_time")
     protected  Date createTime;
+    @Column(name = "department_name")
+    protected  String departmentName;
+    @Column(name = "telephone")
+    protected  String telephone;
 }

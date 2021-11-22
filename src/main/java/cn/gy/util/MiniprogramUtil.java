@@ -38,6 +38,7 @@ public class MiniprogramUtil {
             sessionData = responseEntity.getBody();
             // 此处为返回json数据转换成javabean，可以自己查阅其他材料写
             miniprogramResult = JSONArray.parseObject(sessionData, MiniprogramResult.class);
+            log.info("请求数据结束result:" + miniprogramResult);
             if (miniprogramResult != null) {
                 return miniprogramResult;
             }
