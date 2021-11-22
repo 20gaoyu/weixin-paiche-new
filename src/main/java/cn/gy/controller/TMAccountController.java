@@ -289,7 +289,7 @@ public class TMAccountController {
         log.info("小程序审批记录:{}", dispatchCarDetail);
         if (dispatchCarDetail != null) {
             // 下面就可以写自己的业务代码了
-            if (dispatchCarDetail.getCancelReason() != null || !"".equals(dispatchCarDetail.getCancelReason())) {
+            if (dispatchCarDetail.getCancelReason() != null && !"".equals(dispatchCarDetail.getCancelReason())) {
                 dispatchCarDetail.setStatus(AuditStatusEnum.CANCLE.getName());
                 tmDispatchCarDetailService.updateDetail(dispatchCarDetail);
                 return ResultGenerator.genSuccessResult("审批成功");
@@ -313,8 +313,9 @@ public class TMAccountController {
                     dispatchCarDetail.setStatus(AuditStatusEnum.SCHEDULING.getName());
                     tmDispatchCarDetailService.updateDetail(dispatchCarDetail);
                     String userId = sendCompanyMessage.getUserId(memberList.get(0).getTelephone());
+                    log.info("two audit id is user:{}",userId);
                     if (userId != null) {
-                        sendCompanyMessage.sendWeChatMsgText("", "2", "", "微信测试" + dispatchCarDetail.getOneAudit(), "0");
+                        sendCompanyMessage.sendWeChatMsgText("", "2", "", "微信测试" + dispatchCarDetail.getTwoAudit(), "0");
                         return ResultGenerator.genSuccessResult("提交成功");
                     } else {
                         return ResultGenerator.genFailResult("调度人未加入企业微信");
@@ -324,8 +325,7 @@ public class TMAccountController {
                 Member driver = tmMemberService.findById(dispatchCarDetail.getDriverId());
                 String userId = sendCompanyMessage.getUserId(driver.getTelephone());
                 if (userId != null) {
-                    sendCompanyMessage.sendWeChatMsgText("", "2", "", "微信测试" + dispatchCarDetail.getOneAudit(), "0");
-                    dispatchCarDetail.setStatus(AuditStatusEnum.COMPLETE.getName());
+                    log.info("driver {},oneAudit:{},TwoAudit:{}",userId,dispatchCarDetail.getOneAudit(),dispatchCarDetail.getTwoAudit());
                     tmDispatchCarDetailService.updateDetail(dispatchCarDetail);
                     sendCompanyMessage.sendWeChatMsgText("", "2", "", "微信测试" + dispatchCarDetail.getTwoAudit(), "0");
                     return ResultGenerator.genSuccessResult("审批成功");
