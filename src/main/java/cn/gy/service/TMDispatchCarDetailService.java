@@ -76,4 +76,12 @@ public class TMDispatchCarDetailService extends AbstractService<DispatchCarDetai
 		List<DispatchCarDetail> instList = tmDispatchCarDetailMapper.selectByCondition(condition);
 		return instList;
 	}
+	public List<DispatchCarDetail> getListByTime(String startTime,String endTime) {
+		Condition condition = new Condition(DispatchCarDetail.class);
+		condition.setOrderByClause("create_time desc");
+		Condition.Criteria criteria = condition.createCriteria();
+		criteria.andBetween("createTime", startTime,endTime);
+		List<DispatchCarDetail> instList = tmDispatchCarDetailMapper.selectByCondition(condition);
+		return instList;
+	}
 }
