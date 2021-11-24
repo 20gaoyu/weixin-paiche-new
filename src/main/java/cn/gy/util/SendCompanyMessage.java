@@ -7,6 +7,10 @@ import java.net.URL;
 import javax.net.ssl.HttpsURLConnection;
 
 
+import cn.gy.bean.MiniProgramContent;
+import cn.gy.bean.MiniProgramMessage;
+import cn.gy.bean.MiniprogramResult;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.httpclient.HttpClient;
@@ -15,7 +19,13 @@ import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.params.DefaultHttpParams;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 
 /**
@@ -58,7 +68,7 @@ public class SendCompanyMessage {
             client.executeMethod(get);
             result = new String(get.getResponseBodyAsString().getBytes("utf-8"));
         } catch (IOException e) {
-            log.info("get tokcen result error",e);
+            log.info("get tokcen result error", e);
         }
         // 将数据转换成json
         if (result == null || result == "") {
@@ -247,6 +257,53 @@ public class SendCompanyMessage {
         }
     }
 
+    /*
+    // build uri
+URI uri = new URIBuilder().setScheme("http").setHost(ip).setPort(port).setPath("/platform/service")
+            .addParameter("user", RUYIN_USER_ID1)
+            .addParameter("service", service)
+            .addParameter("data", FastJsonConvertUtil.convertObjectToJSON(data))
+            .build();
+
+build http headers
+HttpHeaders headers = new HttpHeaders();
+headers.add("x-auth-token","123");
+
+send request and get response
+String result = restTemplate.postForObject(uri, new HttpEntity<String>(headers), String.class);
+     */
+    public void sendMiniProgramtMsg(String id, String user, String toParty) {
+        MiniProgramContent miniProgramContent = new MiniProgramContent();
+        miniProgramContent.setAppid("wxc0e2820b95ed1b06");
+        miniProgramContent.setPage("/Pages/audit/audit?id=" + id);
+        miniProgramContent.setTitle("用车审核消息");
+        MiniProgramMessage miniProgramMessage = new MiniProgramMessage();
+        miniProgramMessage.setToUser(user);
+        miniProgramMessage.setToParty(toParty);
+        miniProgramMessage.setMsgType("miniprogram_notice");
+        miniProgramMessage.setMiniProgarmContent(miniProgramContent);
+        log.info("send message：" + JSONObject.toJSONString(miniProgramMessage));
+        String ACCESS_TOKEN = getAccessToken();
+        // 拼接请求串
+        String url = CREATE_SESSION_URL + ACCESS_TOKEN;
+        String sessionData = "";
+        RestTemplate restTemplate = new RestTemplate();
+        // 进行网络请求,访问url接口
+        HttpHeaders requestHeaders = new HttpHeaders();
+        requestHeaders.add("Content-Type", "application/json;charset=UTF-8");
+        HttpEntity<String> requestEntity = new HttpEntity<>(JSONObject.toJSONString(miniProgramMessage), requestHeaders);
+        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
+        // 根据返回值进行后续操作
+        if (responseEntity != null && responseEntity.getStatusCode() == HttpStatus.OK) {
+            sessionData = responseEntity.getBody();
+            // 此处为返回json数据转换成javabean，可以自己查阅其他材料写
+            log.info("请求数据结束result:" + sessionData);
+        } else {
+            log.info("responseEntity: fail");
+        }
+
+    }
+
     public String getUserId(String phone) {
         URL uRl;
         String ACCESS_TOKEN = getAccessToken();
@@ -301,7 +358,7 @@ public class SendCompanyMessage {
             result = (String) jasonObject.get("userid");
             return result;
         } catch (Exception e) {
-            log.info("get user id fail",e);
+            log.info("get user id fail", e);
             return null;
         }
 
@@ -390,15 +447,16 @@ public class SendCompanyMessage {
 
         } catch (Exception e) {
 
-            log.info("send message fail",e);
+            log.info("send message fail", e);
 
         }
     }
 
     public static void main(String[] args) {
         SendCompanyMessage weChat = new SendCompanyMessage();
-        weChat.sendWeChatMsgText("", "2", "", "微信测试", "0");
-        weChat.getUserId("13510186268");
+        weChat.sendMiniProgramtMsg("8", "GaoYu", "2");
+        //weChat.sendWeChatMsgText("", "2", "", "微信测试", "0");
+        //weChat.getUserId("13510186268");
         // weChat.sendWeChatMsg("text", "mxlydx", "4", "", "测试senMsg", "", "",
         // "", "", "", "0");
         // weChat.sendWeChatMessage("mxlydq", "2", "", "Hi");
