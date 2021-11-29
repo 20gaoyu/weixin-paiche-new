@@ -43,7 +43,7 @@ public class SendCompanyMessage {
     // 获取配置文件中的值
     private final static String CORPID = "ww6d8bc261b108240d";// 需要自己申请，官网有试用企业号
     // 可以申请试用
-    private final static String CORPSECRET = "UkcIFFZ6iJboqv2e0l3pwn1EypIM_D4PsOKTFWVyEm8";
+    private final static String CORPSECRET = "DNc_IcdAo3gC5N04Jll7Vqt89bSq3XRW7utVoc0LXBY";
     // 获取访问权限码URL
     private final static String ACCESS_TOKEN_URL = "https://qyapi.weixin.qq.com/cgi-bin/gettoken";
     // 创建会话请求URL
@@ -275,7 +275,8 @@ String result = restTemplate.postForObject(uri, new HttpEntity<String>(headers),
     public void sendMiniProgramtMsg(String id, String user, String toParty) {
         MiniProgramContent miniProgramContent = new MiniProgramContent();
         miniProgramContent.setAppid("wxc0e2820b95ed1b06");
-        miniProgramContent.setPage("/Pages/audit/audit?id=" + id);
+//        miniProgramContent.setPage("Pages/audit/audit?id=" + id);
+        miniProgramContent.setPage("pages/audit/audit?id=" + id);
         miniProgramContent.setTitle("用车审核消息");
         MiniProgramMessage miniProgramMessage = new MiniProgramMessage();
         miniProgramMessage.setToUser(user);
@@ -454,7 +455,7 @@ String result = restTemplate.postForObject(uri, new HttpEntity<String>(headers),
 
     public static void main(String[] args) {
         SendCompanyMessage weChat = new SendCompanyMessage();
-        weChat.sendMiniProgramtMsg("8", "GaoYu", "2");
+        weChat.sendMiniProgramtMsg("8", "GaoYu", "1");
         //weChat.sendWeChatMsgText("", "2", "", "微信测试", "0");
         //weChat.getUserId("13510186268");
         // weChat.sendWeChatMsg("text", "mxlydx", "4", "", "测试senMsg", "", "",

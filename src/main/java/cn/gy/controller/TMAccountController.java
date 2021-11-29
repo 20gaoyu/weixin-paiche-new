@@ -244,8 +244,9 @@ public class TMAccountController {
                 dispatchCarDetail.setOneAudit(memberList.get(0).getAccountName());
                 tmDispatchCarDetailService.add(dispatchCarDetail);
                 String userId = sendCompanyMessage.getUserId(memberList.get(0).getTelephone());
+                log.info("一级审核人：{}，电话{}",memberList.get(0).getAccountName(),memberList.get(0).getTelephone());
                 if (userId != null) {
-                    sendCompanyMessage.sendWeChatMsgText("", "2", "", "微信测试" + dispatchCarDetail.getOneAudit(), "0");
+                    sendCompanyMessage.sendMiniProgramtMsg(dispatchCarDetail.getId()+"", userId, "1");
                     return ResultGenerator.genSuccessResult("提交成功");
                 } else {
                     return ResultGenerator.genFailResult("审核人未加入企业微信");
@@ -315,7 +316,7 @@ public class TMAccountController {
                     String userId = sendCompanyMessage.getUserId(memberList.get(0).getTelephone());
                     log.info("two audit id is user:{}",userId);
                     if (userId != null) {
-                        sendCompanyMessage.sendWeChatMsgText("", "2", "", "微信测试" + dispatchCarDetail.getTwoAudit(), "0");
+                        sendCompanyMessage.sendMiniProgramtMsg(dispatchCarDetail.getId()+"", userId, "1");
                         return ResultGenerator.genSuccessResult("提交成功");
                     } else {
                         return ResultGenerator.genFailResult("调度人未加入企业微信");
@@ -323,11 +324,15 @@ public class TMAccountController {
                 }
             } else {
                 Member driver = tmMemberService.findById(dispatchCarDetail.getDriverId());
+                if(driver==null){
+                    log.info("司机未加入企业微信");
+                    return ResultGenerator.genFailResult("司机未加入企业微信");
+                }
                 String userId = sendCompanyMessage.getUserId(driver.getTelephone());
                 if (userId != null) {
                     log.info("driver {},oneAudit:{},TwoAudit:{}",userId,dispatchCarDetail.getOneAudit(),dispatchCarDetail.getTwoAudit());
                     tmDispatchCarDetailService.updateDetail(dispatchCarDetail);
-                    sendCompanyMessage.sendWeChatMsgText("", "2", "", "微信测试" + dispatchCarDetail.getTwoAudit(), "0");
+                    sendCompanyMessage.sendWeChatMsgText(userId, "1", "", "有派车信息:" + dispatchCarDetail.toString() , "0");
                     return ResultGenerator.genSuccessResult("审批成功");
                 } else {
                     return ResultGenerator.genFailResult("司机未加入企业微信");
