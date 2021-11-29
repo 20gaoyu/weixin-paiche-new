@@ -44,12 +44,16 @@ public class SendCompanyMessage {
     private final static String CORPID = "ww6d8bc261b108240d";// 需要自己申请，官网有试用企业号
     // 可以申请试用
     private final static String CORPSECRET = "DNc_IcdAo3gC5N04Jll7Vqt89bSq3XRW7utVoc0LXBY";
+
+    private final static String TMPLATE_SECRET ="s4XUuALyN6EhA7wUggiv2ir41hyxIg-U0JrlEL1PPKc";
     // 获取访问权限码URL
     private final static String ACCESS_TOKEN_URL = "https://qyapi.weixin.qq.com/cgi-bin/gettoken";
     // 创建会话请求URL
     private final static String CREATE_SESSION_URL = "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=";
 
     private final static String GET_USERID_URL = "https://qyapi.weixin.qq.com/cgi-bin/user/getuserid?access_token=";
+
+    private final static String TEMPLATE = "https://qyapi.weixin.qq.com/cgi-bin/oa/gettemplatedetail?access_token=";
 
     // 获取接口访问权限码
     public String getAccessToken() {
@@ -83,7 +87,37 @@ public class SendCompanyMessage {
         return result;
 
     }
+    public String getAccessToken(String secret) {
+        HttpClient client = new HttpClient();
+//        PostMethod post = new PostMethod(ACCESS_TOKEN_URL);
+        GetMethod get = new GetMethod(ACCESS_TOKEN_URL);
+        get.releaseConnection();
+        get.setRequestHeader("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8");
+        NameValuePair[] param = {new NameValuePair("corpid", CORPID), new NameValuePair("corpsecret", secret)};
+        // 设置策略，防止报cookie错误
+        DefaultHttpParams.getDefaultParams().setParameter("http.protocol.cookie-policy", CookiePolicy.BROWSER_COMPATIBILITY);
+        // 给post设置参数
+        get.setQueryString(param);
+        String result = null;
+        try {
+            client.executeMethod(get);
+            result = new String(get.getResponseBodyAsString().getBytes("utf-8"));
+        } catch (IOException e) {
+            log.info("get tokcen result error", e);
+        }
+        // 将数据转换成json
+        if (result == null || result == "") {
+            log.info("*****************");
+            log.info("result:null");
+        } else {
+            log.info("result is not  null:" + result.toString());
+            JSONObject jasonObject = JSONObject.parseObject(result);
+            result = (String) jasonObject.get("access_token");
+        }
+        get.releaseConnection();
+        return result;
 
+    }
     /**
      * 企业接口向下属关注用户发送微信消息(实现方式一)
      *
@@ -304,7 +338,31 @@ String result = restTemplate.postForObject(uri, new HttpEntity<String>(headers),
         }
 
     }
+    public void getTemplate(String template) {
+        StringBuffer sb = new StringBuffer();
+        sb.append("{");
+        sb.append("\"template_id\":" + "\"" + template + "\"").append("}");
+        log.info("send message：" + sb.toString());
+        String ACCESS_TOKEN = getAccessToken(TMPLATE_SECRET);
+        // 拼接请求串
+        String url = TEMPLATE + ACCESS_TOKEN;
+        String sessionData = "";
+        RestTemplate restTemplate = new RestTemplate();
+        // 进行网络请求,访问url接口
+        HttpHeaders requestHeaders = new HttpHeaders();
+        requestHeaders.add("Content-Type", "application/json;charset=UTF-8");
+        HttpEntity<String> requestEntity = new HttpEntity<>(sb.toString(), requestHeaders);
+        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
+        // 根据返回值进行后续操作
+        if (responseEntity != null && responseEntity.getStatusCode() == HttpStatus.OK) {
+            sessionData = responseEntity.getBody();
+            // 此处为返回json数据转换成javabean，可以自己查阅其他材料写
+            log.info("请求数据结束result:" + sessionData);
+        } else {
+            log.info("responseEntity: fail");
+        }
 
+    }
     public String getUserId(String phone) {
         URL uRl;
         String ACCESS_TOKEN = getAccessToken();
@@ -454,8 +512,11 @@ String result = restTemplate.postForObject(uri, new HttpEntity<String>(headers),
     }
 
     public static void main(String[] args) {
+        String template="3WK7K6oK7xvcz4efXN8fxHMqpA56MUWBMNvC9mSA";
         SendCompanyMessage weChat = new SendCompanyMessage();
-        weChat.sendMiniProgramtMsg("8", "GaoYu", "1");
+        weChat.getTemplate(template);
+        //weChat.sendMiniProgramtMsg("8", "GaoYu", "1");
+
         //weChat.sendWeChatMsgText("", "2", "", "微信测试", "0");
         //weChat.getUserId("13510186268");
         // weChat.sendWeChatMsg("text", "mxlydx", "4", "", "测试senMsg", "", "",
