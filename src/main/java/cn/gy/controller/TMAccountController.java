@@ -37,7 +37,6 @@ import tk.mybatis.mapper.entity.Condition;
 
 import javax.annotation.Resource;
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -184,7 +183,7 @@ public class TMAccountController {
             if (openid == null || "".equals(openid)) {
                 return ResultGenerator.genFailResult(ResultCode.UNAUTHORIZED, "填写号码注册");
             } else {
-                List<DispatchCarDetail> list = tmDispatchCarDetailService.getListByAudit("applicant", member.getAccountName());
+                List<DispatchCarDetail> list = tmDispatchCarDetailService.getListByAudit("telephone", member.getTelephone());
 //                }else if(PositionEnum.AUDITD_IRECTOR.getName().equals(member.getPosition())){
 //                     list = tmDispatchCarDetailService.getListByAudit("oneAudit",member.getAccountName());
 //                }else if(PositionEnum.AUDITD_SCHEDULING.getName().equals(member.getPosition())){
@@ -211,7 +210,7 @@ public class TMAccountController {
                 return ResultGenerator.genFailResult(ResultCode.UNAUTHORIZED, "填写号码注册");
             } else {
 
-                List<DispatchCarDetail> list = tmDispatchCarDetailService.getListByNocomment("applicant", member.getAccountName());
+                List<DispatchCarDetail> list = tmDispatchCarDetailService.getListByNocomment("telephone", member.getTelephone());
                 return ResultGenerator.genSuccessResult(list);
             }
         } else {
@@ -249,7 +248,8 @@ public class TMAccountController {
                     sendCompanyMessage.sendMiniProgramtMsg(dispatchCarDetail.getId()+"", userId, "1");
                     return ResultGenerator.genSuccessResult("提交成功");
                 } else {
-                    return ResultGenerator.genFailResult("审核人未加入企业微信");
+                    log.info("一级审核人未加入企业微信");
+                    return ResultGenerator.genFailResult("一级审核人未加入企业微信");
                 }
 
             }
@@ -266,6 +266,7 @@ public class TMAccountController {
             List<Department> list = tmDepartmentService.getList(departmentName);
 
             if (list.isEmpty()) {
+                log.info("没有对应部门{}" , departmentName);
                 return ResultGenerator.genFailResult(ResultCode.UNAUTHORIZED, "没有对应部门" + departmentName);
             }
             Department department = list.get(0);
@@ -276,28 +277,36 @@ public class TMAccountController {
                 memberList = tmMemberService.getMember(departmentName, PositionEnum.DRIVER.getName());
             }
             if (memberList.isEmpty()) {
+                log.info("部门没有驾驶员");
                 return ResultGenerator.genFailResult(ResultCode.UNAUTHORIZED, "部门没有驾驶员");
             } else {
                 return ResultGenerator.genSuccessResult(memberList);
             }
         } else {
+            log.info("查询驾驶员未填写部门");
             return ResultGenerator.genFailResult(ResultCode.UNAUTHORIZED, "未填写部门");
         }
     }
 
     @PostMapping("/wxaudit")
     public Result wxaudit(@RequestBody DispatchCarDetailVo dispatchCarDetail) {
-        log.info("小程序审批记录:{}", dispatchCarDetail);
+        log.info("小程序审批:{}", dispatchCarDetail);
+        String appLicantUserId = sendCompanyMessage.getUserId(dispatchCarDetail.getTelephone());
         if (dispatchCarDetail != null) {
             // 下面就可以写自己的业务代码了
             if (dispatchCarDetail.getCancelReason() != null && !"".equals(dispatchCarDetail.getCancelReason())) {
                 dispatchCarDetail.setStatus(AuditStatusEnum.CANCLE.getName());
                 tmDispatchCarDetailService.updateDetail(dispatchCarDetail);
+                if(appLicantUserId!=null) {
+                    sendCompanyMessage.sendWeChatMsgText(appLicantUserId, "1", "", "你的申请已经被驳回:" + dispatchCarDetail.toString(), "0");
+                }
+                log.info("审批成功，驳回原因：{}",dispatchCarDetail.getCancelReason());
                 return ResultGenerator.genSuccessResult("审批成功");
             }
             if (dispatchCarDetail.getTwoAudit() == null) {
                 List<Department> list = tmDepartmentService.getList(dispatchCarDetail.getDepartmentName());
                 if (list.isEmpty()) {
+                    log.info("一级审批：没有对应部门");
                     return ResultGenerator.genFailResult(ResultCode.UNAUTHORIZED, "没有对应部门" + dispatchCarDetail.getDepartmentName());
                 }
                 Department department = list.get(0);
@@ -308,14 +317,15 @@ public class TMAccountController {
                     memberList = tmMemberService.getMember(dispatchCarDetail.getDepartmentName(), PositionEnum.AUDITD_SCHEDULING.getName());
                 }
                 if (memberList.isEmpty()) {
+                    log.info("一级审批：没有对应调度 ：{}",department);
                     return ResultGenerator.genFailResult(ResultCode.UNAUTHORIZED, "没有对应调度");
                 } else {
                     dispatchCarDetail.setTwoAudit(memberList.get(0).getAccountName());
                     dispatchCarDetail.setStatus(AuditStatusEnum.SCHEDULING.getName());
                     tmDispatchCarDetailService.updateDetail(dispatchCarDetail);
                     String userId = sendCompanyMessage.getUserId(memberList.get(0).getTelephone());
-                    log.info("two audit id is user:{}",userId);
                     if (userId != null) {
+                        log.info("---------二级审批  user id is :{}",userId);
                         sendCompanyMessage.sendMiniProgramtMsg(dispatchCarDetail.getId()+"", userId, "1");
                         return ResultGenerator.genSuccessResult("提交成功");
                     } else {
@@ -328,18 +338,24 @@ public class TMAccountController {
                     log.info("司机未加入企业微信");
                     return ResultGenerator.genFailResult("司机未加入企业微信");
                 }
-                String userId = sendCompanyMessage.getUserId(driver.getTelephone());
-                if (userId != null) {
-                    log.info("driver {},oneAudit:{},TwoAudit:{}",userId,dispatchCarDetail.getOneAudit(),dispatchCarDetail.getTwoAudit());
+                String driverUserId = sendCompanyMessage.getUserId(driver.getTelephone());
+                if (driverUserId != null) {
+                    log.info("driver {},oneAudit:{},TwoAudit:{}",driverUserId,dispatchCarDetail.getOneAudit(),dispatchCarDetail.getTwoAudit());
+                    dispatchCarDetail.setStatus(AuditStatusEnum.COMPLETE.getName());
                     tmDispatchCarDetailService.updateDetail(dispatchCarDetail);
-                    sendCompanyMessage.sendWeChatMsgText(userId, "1", "", "有派车信息:" + dispatchCarDetail.toString() , "0");
-                    return ResultGenerator.genSuccessResult("审批成功");
+                    sendCompanyMessage.sendWeChatMsgText(driverUserId, "1", "", "有派车信息:" + dispatchCarDetail.toString() , "0");
+                    if(appLicantUserId!=null){
+                        sendCompanyMessage.sendWeChatMsgText(appLicantUserId, "1", "", "你的申请已经审核完成:" + dispatchCarDetail.toString() , "0");
+                    }
+                    log.info("二级审批完成");
+                    return ResultGenerator.genSuccessResult("审批完成");
                 } else {
+                    log.info("司机未加入企业微信");
                     return ResultGenerator.genFailResult("司机未加入企业微信");
                 }
             }
-
         } else {
+            log.info("提交数据为空");
             return ResultGenerator.genFailResult(ResultCode.UNAUTHORIZED, "提交数据为空");
         }
     }

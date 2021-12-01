@@ -4,12 +4,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import javax.annotation.Resource;
 import javax.net.ssl.HttpsURLConnection;
 
 
+import cn.gy.bean.Member;
 import cn.gy.bean.MiniProgramContent;
 import cn.gy.bean.MiniProgramMessage;
 import cn.gy.bean.MiniprogramResult;
+import cn.gy.service.TMMemberService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
@@ -54,6 +57,8 @@ public class SendCompanyMessage {
     private final static String GET_USERID_URL = "https://qyapi.weixin.qq.com/cgi-bin/user/getuserid?access_token=";
 
     private final static String TEMPLATE = "https://qyapi.weixin.qq.com/cgi-bin/oa/gettemplatedetail?access_token=";
+    @Resource
+    private TMMemberService tmMemberService;
 
     // 获取接口访问权限码
     public String getAccessToken() {
@@ -314,7 +319,7 @@ String result = restTemplate.postForObject(uri, new HttpEntity<String>(headers),
         miniProgramContent.setTitle("用车审核消息");
         MiniProgramMessage miniProgramMessage = new MiniProgramMessage();
         miniProgramMessage.setToUser(user);
-        miniProgramMessage.setToParty(toParty);
+        //miniProgramMessage.setToParty(toParty);
         miniProgramMessage.setMsgType("miniprogram_notice");
         miniProgramMessage.setMiniProgarmContent(miniProgramContent);
         log.info("send message：" + JSONObject.toJSONString(miniProgramMessage));
@@ -364,6 +369,11 @@ String result = restTemplate.postForObject(uri, new HttpEntity<String>(headers),
 
     }
     public String getUserId(String phone) {
+
+        Member member = tmMemberService.getMemberByTelephone("telephone", phone);
+        if(member!=null&&"-".equals(member.getSex())){
+            return member.getSex();
+        }
         URL uRl;
         String ACCESS_TOKEN = getAccessToken();
         // 拼接请求串
@@ -374,40 +384,23 @@ String result = restTemplate.postForObject(uri, new HttpEntity<String>(headers),
         sb.append("\"mobile\":" + "\"" + phone + "\"");
         sb.append("}");
         String json = sb.toString();
-
         try {
             uRl = new URL(action);
-
             HttpsURLConnection http = (HttpsURLConnection) uRl.openConnection();
-
             http.setRequestMethod("POST");
-
-            http.setRequestProperty("Content-Type",
-
-                    "application/json;charset=UTF-8");
-
+            http.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
             http.setDoOutput(true);
-
             http.setDoInput(true);
-
             System.setProperty("sun.net.client.defaultConnectTimeout", "30000");//
             // 连接超时30秒
-
             System.setProperty("sun.net.client.defaultReadTimeout", "30000"); //
             // 读取超时30秒
-
             http.connect();
-
             OutputStream os = http.getOutputStream();
-
             os.write(json.getBytes("UTF-8"));// 传入参数
-
             InputStream is = http.getInputStream();
-
             int size = is.available();
-
             byte[] jsonBytes = new byte[size];
-
             is.read(jsonBytes);
             String result = new String(jsonBytes, "UTF-8");
             log.info("请求返回结果:" + result);
@@ -415,7 +408,15 @@ String result = restTemplate.postForObject(uri, new HttpEntity<String>(headers),
             os.close();
             JSONObject jasonObject = JSONObject.parseObject(result);
             result = (String) jasonObject.get("userid");
-            return result;
+            if(result!=null&&!"".equals(result)){
+                member.setSex(result);
+                tmMemberService.update(member);
+                return result;
+            }else{
+                log.info("get user id null");
+                return null;
+            }
+
         } catch (Exception e) {
             log.info("get user id fail", e);
             return null;
@@ -443,8 +444,8 @@ String result = restTemplate.postForObject(uri, new HttpEntity<String>(headers),
         // 封装发送消息请求json
         StringBuffer sb = new StringBuffer();
         sb.append("{");
-        //sb.append("\"touser\":" + "\"" + touser + "\",");
-        sb.append("\"toparty\":" + "\"" + toparty + "\",");
+        sb.append("\"touser\":" + "\"" + touser + "\",");
+        //sb.append("\"toparty\":" + "\"" + toparty + "\",");
         sb.append("\"totag\":" + "\"" + totag + "\",");
 
         sb.append("\"msgtype\":" + "\"" + MSGTYPE + "\",");
@@ -453,7 +454,7 @@ String result = restTemplate.postForObject(uri, new HttpEntity<String>(headers),
         sb.append("}");
 
         sb.append(",\"safe\":" + "\"" + safe + "\",");
-        sb.append("\"agentid\":" + "\"" + "1000002" + "\",");
+        sb.append("\"agentid\":" + "\"" + "1000003" + "\",");
         sb.append("\"debug\":" + "\"" + "1" + "\"");
         sb.append("}");
         String json = sb.toString();
@@ -514,7 +515,9 @@ String result = restTemplate.postForObject(uri, new HttpEntity<String>(headers),
     public static void main(String[] args) {
         String template="3WK7K6oK7xvcz4efXN8fxHMqpA56MUWBMNvC9mSA";
         SendCompanyMessage weChat = new SendCompanyMessage();
-        weChat.getTemplate(template);
+        weChat.sendWeChatMsgText("GaoYu", "1", "", "有派车信息:----"  , "0");
+
+        //weChat.getTemplate(template);
         //weChat.sendMiniProgramtMsg("8", "GaoYu", "1");
 
         //weChat.sendWeChatMsgText("", "2", "", "微信测试", "0");

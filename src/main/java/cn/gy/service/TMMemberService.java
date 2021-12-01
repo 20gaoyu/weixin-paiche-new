@@ -94,7 +94,7 @@ public class TMMemberService extends AbstractService<Member> {
 		Condition condition = new Condition(Member.class);
 		Condition.Criteria criteria = condition.createCriteria();
 		criteria.andEqualTo("departmentName", departmentName);
-		criteria.andEqualTo("position", position);
+		criteria.andLike("position", position);
 		List<Member> instList = tmMemberMapper.selectByCondition(condition);
 		return instList;
 	}
@@ -110,5 +110,15 @@ public class TMMemberService extends AbstractService<Member> {
 		List<Member> instList = tmMemberMapper.selectByCondition(condition);
 
 		return instList;
+	}
+	public Member getMemberByTelephone(String field,String name) {
+		Condition condition = new Condition(DispatchCarDetail.class);
+		Condition.Criteria criteria = condition.createCriteria();
+		criteria.andEqualTo(field,name);
+		List<Member> instList = tmMemberMapper.selectByCondition(condition);
+		if(instList.isEmpty()){
+			return null;
+		}
+		return instList.get(0);
 	}
 }
