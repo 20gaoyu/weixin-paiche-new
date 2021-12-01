@@ -243,8 +243,8 @@ public class TMAccountController {
                 dispatchCarDetail.setOneAudit(memberList.get(0).getAccountName());
                 tmDispatchCarDetailService.add(dispatchCarDetail);
                 String userId = sendCompanyMessage.getUserId(memberList.get(0).getTelephone());
-                log.info("一级审核人：{}，电话{}",memberList.get(0).getAccountName(),memberList.get(0).getTelephone());
                 if (userId != null) {
+                    log.info("一级审核人:{}，电话:{},userId:{}",userId,memberList.get(0).getAccountName(),memberList.get(0).getTelephone());
                     sendCompanyMessage.sendMiniProgramtMsg(dispatchCarDetail.getId()+"", userId, "1");
                     return ResultGenerator.genSuccessResult("提交成功");
                 } else {

@@ -371,7 +371,7 @@ String result = restTemplate.postForObject(uri, new HttpEntity<String>(headers),
     public String getUserId(String phone) {
 
         Member member = tmMemberService.getMemberByTelephone("telephone", phone);
-        if(member!=null&&"-".equals(member.getSex())){
+        if(member!=null&&!"-".equals(member.getSex())){
             return member.getSex();
         }
         URL uRl;
