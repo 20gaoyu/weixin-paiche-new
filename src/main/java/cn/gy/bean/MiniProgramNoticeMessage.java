@@ -8,7 +8,7 @@ import lombok.Data;
  * @CreateTime: 2021/11/24 10:37
  */
 @Data
-public class MiniProgramMessage {
+public class MiniProgramNoticeMessage {
     @JSONField(name="touser")
     private String toUser;
     @JSONField(name="toparty")
@@ -19,8 +19,8 @@ public class MiniProgramMessage {
     private String msgType;
     @JSONField(name="agentid")
     private String agentId;
-    @JSONField(name="miniprogram_notice")
-    private MiniProgramContent miniProgarmContent;
+    @JSONField(name="template_card")
+    private TemplateCard templateCard;
 
 
 
