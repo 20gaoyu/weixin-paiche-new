@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import javax.annotation.Resource;
 import javax.net.ssl.HttpsURLConnection;
 
@@ -11,7 +13,11 @@ import javax.net.ssl.HttpsURLConnection;
 import cn.gy.bean.Member;
 import cn.gy.bean.MiniProgramContent;
 import cn.gy.bean.MiniProgramMessage;
+import cn.gy.bean.MiniProgramNews;
+import cn.gy.bean.MiniProgramNoticeMessage;
 import cn.gy.bean.MiniprogramResult;
+import cn.gy.bean.News;
+import cn.gy.bean.TemplateCard;
 import cn.gy.service.TMMemberService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -319,6 +325,7 @@ String result = restTemplate.postForObject(uri, new HttpEntity<String>(headers),
         miniProgramContent.setTitle("用车审核消息");
         MiniProgramMessage miniProgramMessage = new MiniProgramMessage();
         miniProgramMessage.setToUser(user);
+        miniProgramMessage.setAgentId("1000003");
         //miniProgramMessage.setToParty(toParty);
         miniProgramMessage.setMsgType("miniprogram_notice");
         miniProgramMessage.setMiniProgarmContent(miniProgramContent);
@@ -342,6 +349,89 @@ String result = restTemplate.postForObject(uri, new HttpEntity<String>(headers),
             log.info("responseEntity: fail");
         }
 
+    }
+    public void sendMiniCardProgramtMsg(String id, String user, String toParty) {
+        MiniProgramNoticeMessage miniProgramMessage = new MiniProgramNoticeMessage();
+        miniProgramMessage.setToUser(user);
+        miniProgramMessage.setAgentId("1000003");
+        //miniProgramMessage.setToParty(toParty);
+        miniProgramMessage.setMsgType("template_card");
+        TemplateCard templateCard = new TemplateCard();
+//        TemplateCard.ActionMenu actionMenu=new  TemplateCard.ActionMenu();
+//        templateCard.setActionMenu(actionMenu);
+        TemplateCard.HorizontalContent horizontalContent=new TemplateCard.HorizontalContent();
+        horizontalContent.setKey("testKey");
+        horizontalContent.setValue("testValue");
+        List<TemplateCard.HorizontalContent> list =new ArrayList<>();
+        list.add(horizontalContent);
+        templateCard.setHorizontalContentList(list);
+        TemplateCard.Jump jump=new TemplateCard.Jump();
+        jump.setTitle("testTitle");
+        List<TemplateCard.Jump> jumpList =new ArrayList<>();
+        jumpList.add(jump);
+        templateCard.setJump(jumpList);
+        TemplateCard.CardAction cardAction=new TemplateCard.CardAction();
+        cardAction.setAppid("wxc0e2820b95ed1b06");
+        cardAction.setPagepath("pages/audit/audit?id=" + id);
+        cardAction.setType("2");
+        templateCard.setCardAction(cardAction);
+        miniProgramMessage.setTemplateCard(templateCard);
+        log.info("send message：" + JSONObject.toJSONString(miniProgramMessage));
+        String ACCESS_TOKEN = getAccessToken();
+        // 拼接请求串
+        String url = CREATE_SESSION_URL + ACCESS_TOKEN;
+        String sessionData = "";
+        RestTemplate restTemplate = new RestTemplate();
+        // 进行网络请求,访问url接口
+        HttpHeaders requestHeaders = new HttpHeaders();
+        requestHeaders.add("Content-Type", "application/json;charset=UTF-8");
+        HttpEntity<String> requestEntity = new HttpEntity<>(JSONObject.toJSONString(miniProgramMessage), requestHeaders);
+        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
+        // 根据返回值进行后续操作
+        if (responseEntity != null && responseEntity.getStatusCode() == HttpStatus.OK) {
+            sessionData = responseEntity.getBody();
+            // 此处为返回json数据转换成javabean，可以自己查阅其他材料写
+            log.info("请求数据结束result:" + sessionData);
+        } else {
+            log.info("responseEntity: fail");
+        }
+    }
+    public void sendMiniProgramtNewsMsg(String id, String user, String toParty) {
+        MiniProgramNews miniProgramMessage = new MiniProgramNews();
+        miniProgramMessage.setToUser(user);
+        miniProgramMessage.setAgentId("1000003");
+        //miniProgramMessage.setToParty(toParty);
+        miniProgramMessage.setMsgType("news");
+        News news=new News();
+        List<News.Articles> list =new ArrayList();
+        News.Articles articles=new  News.Articles();
+        articles.setAppid("wxc0e2820b95ed1b06");
+        articles.setPagepath("pages/audit/audit?id=" + id);
+        articles.setTitle("用车审批消息");
+        articles.setDescription(user+"用车审批消息");
+        articles.setPicurl("https://s3.bmp.ovh/imgs/2021/12/661a79f2155c0471.jpg");
+        list.add(articles);
+        news.setList(list);
+        miniProgramMessage.setNews(news);
+        log.info("send message：" + JSONObject.toJSONString(miniProgramMessage));
+        String ACCESS_TOKEN = getAccessToken();
+        // 拼接请求串
+        String url = CREATE_SESSION_URL + ACCESS_TOKEN;
+        String sessionData = "";
+        RestTemplate restTemplate = new RestTemplate();
+        // 进行网络请求,访问url接口
+        HttpHeaders requestHeaders = new HttpHeaders();
+        requestHeaders.add("Content-Type", "application/json;charset=UTF-8");
+        HttpEntity<String> requestEntity = new HttpEntity<>(JSONObject.toJSONString(miniProgramMessage), requestHeaders);
+        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
+        // 根据返回值进行后续操作
+        if (responseEntity != null && responseEntity.getStatusCode() == HttpStatus.OK) {
+            sessionData = responseEntity.getBody();
+            // 此处为返回json数据转换成javabean，可以自己查阅其他材料写
+            log.info("请求数据结束result:" + sessionData);
+        } else {
+            log.info("responseEntity: fail");
+        }
     }
     public void getTemplate(String template) {
         StringBuffer sb = new StringBuffer();
@@ -515,8 +605,8 @@ String result = restTemplate.postForObject(uri, new HttpEntity<String>(headers),
     public static void main(String[] args) {
         String template="3WK7K6oK7xvcz4efXN8fxHMqpA56MUWBMNvC9mSA";
         SendCompanyMessage weChat = new SendCompanyMessage();
-        weChat.sendWeChatMsgText("GaoYu", "1", "", "有派车信息:----"  , "0");
-
+        //weChat.sendWeChatMsgText("GaoYu", "1", "", "---有派车信息:----"  , "0");
+        weChat.sendMiniProgramtNewsMsg("8", "GaoYu", "1");
         //weChat.getTemplate(template);
         //weChat.sendMiniProgramtMsg("8", "GaoYu", "1");
 

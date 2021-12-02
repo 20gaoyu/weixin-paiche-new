@@ -94,7 +94,7 @@ public class TMMemberService extends AbstractService<Member> {
 		Condition condition = new Condition(Member.class);
 		Condition.Criteria criteria = condition.createCriteria();
 		criteria.andEqualTo("departmentName", departmentName);
-		criteria.andLike("position", position);
+		criteria.andLike("position", "%"+position+"%");
 		List<Member> instList = tmMemberMapper.selectByCondition(condition);
 		return instList;
 	}

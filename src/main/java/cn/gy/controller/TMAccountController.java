@@ -245,7 +245,7 @@ public class TMAccountController {
                 String userId = sendCompanyMessage.getUserId(memberList.get(0).getTelephone());
                 if (userId != null) {
                     log.info("一级审核人:{}，电话:{},userId:{}",userId,memberList.get(0).getAccountName(),memberList.get(0).getTelephone());
-                    sendCompanyMessage.sendMiniProgramtMsg(dispatchCarDetail.getId()+"", userId, "1");
+                    sendCompanyMessage.sendMiniProgramtNewsMsg(dispatchCarDetail.getId()+"", userId, "1");
                     return ResultGenerator.genSuccessResult("提交成功");
                 } else {
                     log.info("一级审核人未加入企业微信");
@@ -326,7 +326,7 @@ public class TMAccountController {
                     String userId = sendCompanyMessage.getUserId(memberList.get(0).getTelephone());
                     if (userId != null) {
                         log.info("---------二级审批  user id is :{}",userId);
-                        sendCompanyMessage.sendMiniProgramtMsg(dispatchCarDetail.getId()+"", userId, "1");
+                        sendCompanyMessage.sendMiniProgramtNewsMsg(dispatchCarDetail.getId()+"", userId, "1");
                         return ResultGenerator.genSuccessResult("提交成功");
                     } else {
                         return ResultGenerator.genFailResult("调度人未加入企业微信");
