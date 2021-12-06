@@ -72,7 +72,7 @@ public class TMDispatchCarDetailService extends AbstractService<DispatchCarDetai
 		condition.setOrderByClause("create_time desc limit 10");
 		Condition.Criteria criteria = condition.createCriteria();
 		criteria.andEqualTo(field, name).andEqualTo("status", AuditStatusEnum.COMPLETE.getName())
-				.andCondition("if_comment is null or if_comment ='' ");
+				.andCondition("(if_comment is null or if_comment ='')");
 		List<DispatchCarDetail> instList = tmDispatchCarDetailMapper.selectByCondition(condition);
 		return instList;
 	}

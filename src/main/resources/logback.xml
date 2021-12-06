@@ -2,10 +2,8 @@
 <configuration>
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <Target>System.out</Target>
-        <filter class="ch.qos.logback.classic.filter.LevelFilter">
-            <level>INFO</level>
-            <onMatch>ACCEPT</onMatch>
-            <onMismatch>DENY</onMismatch>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>DEBUG</level>
         </filter>
         <encoder>
             <pattern>[%d{yyyy-MM-dd HH:mm:ss}] [%level] [%thread] \(%logger{36}.%M:%line\) - %msg%n</pattern>
@@ -22,7 +20,8 @@
             <pattern>[%d{yyyy-MM-dd HH:mm:ss}] [%level] [%thread] \(%logger{36}.%M:%line\) - %msg%n</pattern>
         </encoder>
     </appender>
-
+    <!--mybatis日志输出至logback-->
+    <logger name="cn.gy.dao" level="DEBUG"/>
     <!-- 日志输出级别 -->
     <root level="INFO">
         <appender-ref ref="STDOUT"/>

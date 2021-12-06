@@ -44,6 +44,8 @@ public class MybatisConfigurer {
         // insert、update是否判断字符串类型!='' 即 test="str != null"表达式内是否追加 and str != ''
         properties.setProperty("notEmpty", "false");
         properties.setProperty("IDENTITY", "MYSQL");
+        properties.setProperty("logImpl", "STDOUT_LOGGING");
+
         mapperScannerConfigurer.setProperties(properties);
 
         return mapperScannerConfigurer;
