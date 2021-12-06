@@ -5,11 +5,15 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import javax.annotation.Resource;
 import javax.net.ssl.HttpsURLConnection;
 
 
+import cn.gy.bean.Car;
+import cn.gy.bean.DispatchCarDetail;
+import cn.gy.bean.DispatchCarDetailVo;
 import cn.gy.bean.Member;
 import cn.gy.bean.MiniProgramContent;
 import cn.gy.bean.MiniProgramMessage;
@@ -605,8 +609,25 @@ String result = restTemplate.postForObject(uri, new HttpEntity<String>(headers),
     public static void main(String[] args) {
         String template="3WK7K6oK7xvcz4efXN8fxHMqpA56MUWBMNvC9mSA";
         SendCompanyMessage weChat = new SendCompanyMessage();
-        //weChat.sendWeChatMsgText("GaoYu", "1", "", "---有派车信息:----"  , "0");
-        weChat.sendMiniProgramtNewsMsg("8", "GaoYu", "1");
+        DispatchCarDetailVo dispatchCarDetail=new DispatchCarDetailVo();
+        dispatchCarDetail.setApplicant("高宇");
+        dispatchCarDetail.setUser("高宇");
+        dispatchCarDetail.setStartTime(new Date());
+        dispatchCarDetail.setEndTime(new Date());
+        dispatchCarDetail.setDestination("广州");
+        dispatchCarDetail.setTelephone("13510186268");
+        dispatchCarDetail.setDepartmentName("办公室");
+        dispatchCarDetail.setStatus("已完成");
+        dispatchCarDetail.setUseReason("出差");
+        Member driver=new Member();
+        driver.setAccountName("张三");
+        driver.setTelephone("13586868888");
+        Car car=new Car();
+        car.setLicense("粤A08000");
+        String content="你的申请已经审核完成:\n" + dispatchCarDetail.toString()+"驾驶员："+driver.getAccountName()+";\n"
+                +"驾驶员电话："+driver.getTelephone()+";\n驾驶员车牌:"+car.getLicense();
+        weChat.sendWeChatMsgText("GaoYu", "1", "", content , "0");
+        //weChat.sendMiniProgramtNewsMsg("8", "GaoYu", "1");
         //weChat.getTemplate(template);
         //weChat.sendMiniProgramtMsg("8", "GaoYu", "1");
 

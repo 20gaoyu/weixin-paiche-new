@@ -57,6 +57,8 @@ public class TMAccountController {
     @Resource
     private TMMenuService tMMenuService;
     @Resource
+    private TMCarService tmCarService;
+    @Resource
     private TMMemberService tmMemberService;
     @Resource
     private TMDispatchCarDetailService tmDispatchCarDetailService;
@@ -298,7 +300,7 @@ public class TMAccountController {
                 dispatchCarDetail.setStatus(AuditStatusEnum.CANCLE.getName());
                 tmDispatchCarDetailService.updateDetail(dispatchCarDetail);
                 if(appLicantUserId!=null) {
-                    sendCompanyMessage.sendWeChatMsgText(appLicantUserId, "1", "", "你的申请已经被驳回:" + dispatchCarDetail.toString(), "0");
+                    sendCompanyMessage.sendWeChatMsgText(appLicantUserId, "1", "", "你的申请已经被驳回:\n" + dispatchCarDetail.toString(), "0");
                 }
                 log.info("审批成功，驳回原因：{}",dispatchCarDetail.getCancelReason());
                 return ResultGenerator.genSuccessResult("审批成功");
@@ -334,6 +336,7 @@ public class TMAccountController {
                 }
             } else {
                 Member driver = tmMemberService.findById(dispatchCarDetail.getDriverId());
+                Car car=tmCarService.findById(driver.getJobNumber());
                 if(driver==null){
                     log.info("司机未加入企业微信");
                     return ResultGenerator.genFailResult("司机未加入企业微信");
@@ -343,14 +346,25 @@ public class TMAccountController {
                     log.info("driver {},oneAudit:{},TwoAudit:{}",driverUserId,dispatchCarDetail.getOneAudit(),dispatchCarDetail.getTwoAudit());
                     dispatchCarDetail.setStatus(AuditStatusEnum.COMPLETE.getName());
                     tmDispatchCarDetailService.updateDetail(dispatchCarDetail);
-                    sendCompanyMessage.sendWeChatMsgText(driverUserId, "1", "", "有派车信息:" + dispatchCarDetail.toString() , "0");
+                    String content="";
+                    if(car!=null) {
+                        log.info("二级审批car为空");
+                         content= dispatchCarDetail.toString()+"驾驶员："+driver.getAccountName()+";\n"
+                                +"驾驶员电话："+driver.getTelephone()+"\n"+car.getLicense();
+                    }else{
+                        content="有新的派车信息:\n" + dispatchCarDetail.toString()+"驾驶员："+driver.getAccountName()+";\n"
+                                +"驾驶员电话："+driver.getTelephone()+"\n驾驶员车牌:没有录入";
+                    }
+                    sendCompanyMessage.sendWeChatMsgText(driverUserId, "1", "", "有新的派车信息:\n" +content, "0");
                     if(appLicantUserId!=null){
-                        sendCompanyMessage.sendWeChatMsgText(appLicantUserId, "1", "", "你的申请已经审核完成:" + dispatchCarDetail.toString() , "0");
+                        sendCompanyMessage.sendWeChatMsgText(appLicantUserId, "1", "","你的申请已经审核完成:\n" + content , "0");
+                    }else{
+                        log.info("二级审批:appLicantUserId为空");
                     }
                     log.info("二级审批完成");
                     return ResultGenerator.genSuccessResult("审批完成");
                 } else {
-                    log.info("司机未加入企业微信");
+                    log.info("driverUserId为空;司机未加入企业微信");
                     return ResultGenerator.genFailResult("司机未加入企业微信");
                 }
             }
