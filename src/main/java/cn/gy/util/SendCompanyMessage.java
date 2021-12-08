@@ -400,7 +400,7 @@ String result = restTemplate.postForObject(uri, new HttpEntity<String>(headers),
             log.info("responseEntity: fail");
         }
     }
-    public void sendMiniProgramtNewsMsg(String id, String user, String toParty) {
+    public void sendMiniProgramtNewsMsg(String id, String user, String toParty,String name) {
         MiniProgramNews miniProgramMessage = new MiniProgramNews();
         miniProgramMessage.setToUser(user);
         miniProgramMessage.setAgentId("1000003");
@@ -412,7 +412,7 @@ String result = restTemplate.postForObject(uri, new HttpEntity<String>(headers),
         articles.setAppid("wxc0e2820b95ed1b06");
         articles.setPagepath("pages/audit/audit?id=" + id);
         articles.setTitle("用车审批消息");
-        articles.setDescription(user+"用车审批消息");
+        articles.setDescription(name+"的用车申请消息");
         articles.setPicurl("https://s3.bmp.ovh/imgs/2021/12/661a79f2155c0471.jpg");
         list.add(articles);
         news.setList(list);

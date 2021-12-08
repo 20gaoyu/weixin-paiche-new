@@ -6,6 +6,7 @@ import lombok.Data;
 import javax.persistence.Column;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
 
@@ -17,6 +18,8 @@ public class Car {
     @NotNull(groups = {Update.class}, message = "id不能为空")
     @Column(name = "id")
     private  Long id;
+    @Transient
+    private  Long diverId;
     @Column(name = "license")
     private  String license;
     @Column(name = "brand")

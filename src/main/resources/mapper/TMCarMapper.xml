@@ -6,6 +6,7 @@
           WARNING - @mbg.generated
         -->
         <id column="id" jdbcType="BIGINT" property="id"/>
+        <id column="id" jdbcType="BIGINT" property="diverId"/>
         <result column="license" jdbcType="VARCHAR" property="license"/>
         <result column="brand" jdbcType="VARCHAR" property="brand"/>
         <result column="type" jdbcType="VARCHAR" property="type"/>

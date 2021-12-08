@@ -13,9 +13,8 @@ public class DispatchCarDetailVo extends DispatchCarDetail {
 
     @Override
     public String toString() {
-        cancelReason=cancelReason==null?"无": cancelReason;
+        String cancelReasonTemp =cancelReason==null?"无": cancelReason;
         return
-                "工单id : " + driverId + ";\n"+
                 "申请人:" + applicant + ";\n"+
                 "申请人电话:" + telephone + ";\n"+
                 "申请人部门:" + departmentName + ";\n"+
@@ -25,6 +24,6 @@ public class DispatchCarDetailVo extends DispatchCarDetail {
                 "用车原因:" + useReason + ";\n"+
                 "出行目的地:" + destination + ";\n"+
                 "审核状态:" + status + ";\n"+
-                "驳回原因:" + cancelReason+ ";\n";
+                "驳回原因:" + cancelReasonTemp+ ";\n";
     }
 }

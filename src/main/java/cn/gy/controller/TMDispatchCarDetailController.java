@@ -3,6 +3,7 @@ package cn.gy.controller;
 
 import cn.gy.bean.Car;
 import cn.gy.bean.DispatchCarDetail;
+import cn.gy.bean.DispatchCarDetailVo;
 import cn.gy.bean.Member;
 import cn.gy.bean.PageInfoVo;
 import cn.gy.core.web.Result;
@@ -90,10 +91,10 @@ public class TMDispatchCarDetailController {
      */
     @ApiOperation(value = "更新日志字段", notes = "更新日志字段数据")
     @PutMapping("/detail/update")
-    public Result<String> update(@RequestBody @Valid DispatchCarDetail request) {
+    public Result<String> update(@RequestBody @Valid DispatchCarDetailVo request) {
         log.info("updata start.{}",request);
         try {
-            return tmDispatchCarDetailService.updateDetail(request);
+            return tmDispatchCarDetailService.updateDetailWeb(request);
         } catch (Exception e) {
             log.error("update Exception.", e);
         }

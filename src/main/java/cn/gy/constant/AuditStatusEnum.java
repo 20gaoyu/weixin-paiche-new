@@ -11,8 +11,9 @@ import lombok.Getter;
 public enum AuditStatusEnum {
 	AUDITDING(0,"审核中"),
     SCHEDULING(1,"调度中"),
-    COMPLETE(1,"已完成"),
-	CANCLE(2,"驳回");
+    COMPLETE(2,"已完成"),
+    CANCLE_WEB(3,"已完成"),
+	CANCLE(4,"驳回");
     private Integer type;
     private String name;
 

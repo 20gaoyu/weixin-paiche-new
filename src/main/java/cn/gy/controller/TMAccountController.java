@@ -199,7 +199,16 @@ public class TMAccountController {
             return ResultGenerator.genFailResult(ResultCode.UNAUTHORIZED, "填写号码注册");
         }
     }
-
+    @PostMapping("/wxqueryaudit")
+    public Result wxqueryAudit(@RequestBody Member member) {
+        log.info("小程序登录后获取审批中详单记录:{}", member);
+        if (member != null) {
+            List<DispatchCarDetail> list = tmDispatchCarDetailService.getListByAuditing("telephone", member.getTelephone());
+            return ResultGenerator.genSuccessResult(list);
+        } else {
+            return ResultGenerator.genFailResult(ResultCode.UNAUTHORIZED, "填写号码注册");
+        }
+    }
     @PostMapping("/wxcommentquery")
     public Result wxCommentQuery(@RequestBody Member member) {
         log.info("小程序登录后获取自己详单记录:{}", member);
@@ -247,7 +256,7 @@ public class TMAccountController {
                 String userId = sendCompanyMessage.getUserId(memberList.get(0).getTelephone());
                 if (userId != null) {
                     log.info("一级审核人:{}，电话:{},userId:{}",userId,memberList.get(0).getAccountName(),memberList.get(0).getTelephone());
-                    sendCompanyMessage.sendMiniProgramtNewsMsg(dispatchCarDetail.getId()+"", userId, "1");
+                    sendCompanyMessage.sendMiniProgramtNewsMsg(dispatchCarDetail.getId()+"", userId, "1",dispatchCarDetail.getApplicant());
                     return ResultGenerator.genSuccessResult("提交成功");
                 } else {
                     log.info("一级审核人未加入企业微信");
@@ -328,7 +337,7 @@ public class TMAccountController {
                     String userId = sendCompanyMessage.getUserId(memberList.get(0).getTelephone());
                     if (userId != null) {
                         log.info("---------二级审批  user id is :{}",userId);
-                        sendCompanyMessage.sendMiniProgramtNewsMsg(dispatchCarDetail.getId()+"", userId, "1");
+                        sendCompanyMessage.sendMiniProgramtNewsMsg(dispatchCarDetail.getId()+"", userId, "1",dispatchCarDetail.getApplicant());
                         return ResultGenerator.genSuccessResult("提交成功");
                     } else {
                         return ResultGenerator.genFailResult("调度人未加入企业微信");
@@ -345,6 +354,7 @@ public class TMAccountController {
                 if (driverUserId != null) {
                     log.info("driver {},oneAudit:{},TwoAudit:{}",driverUserId,dispatchCarDetail.getOneAudit(),dispatchCarDetail.getTwoAudit());
                     dispatchCarDetail.setStatus(AuditStatusEnum.COMPLETE.getName());
+                    dispatchCarDetail.setDriver(driverUserId);
                     tmDispatchCarDetailService.updateDetail(dispatchCarDetail);
                     String content="";
                     if(car!=null) {
