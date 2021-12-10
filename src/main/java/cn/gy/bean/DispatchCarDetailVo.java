@@ -10,7 +10,7 @@ import lombok.Data;
 @Data
 public class DispatchCarDetailVo extends DispatchCarDetail {
     private Long driverId;
-
+    private String carNumber;
     @Override
     public String toString() {
         String cancelReasonTemp =cancelReason==null?"无": cancelReason;

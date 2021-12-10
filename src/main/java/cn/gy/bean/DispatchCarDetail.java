@@ -56,4 +56,6 @@ public class DispatchCarDetail {
     protected  String telephone;
     @Column(name = "driver")
     protected  String driver;
+    @Column(name = "useNumber")
+    protected  String useNumber;
 }

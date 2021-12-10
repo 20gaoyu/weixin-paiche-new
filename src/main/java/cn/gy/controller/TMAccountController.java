@@ -242,11 +242,11 @@ public class TMAccountController {
             }
             Department department = list.get(0);
             List<Member> memberList;
-            if (department.getParentId() == 1) {
-                memberList = tmMemberService.getMember("办公室", PositionEnum.AUDITD_IRECTOR.getName());
-            } else {
+//            if (department.getParentId() == 1) {
+//                memberList = tmMemberService.getMember("办公室", PositionEnum.AUDITD_IRECTOR.getName());
+//            } else {
                 memberList = tmMemberService.getMember(dispatchCarDetail.getDepartmentName(), PositionEnum.AUDITD_IRECTOR.getName());
-            }
+//            }
             if (memberList.isEmpty()) {
                 return ResultGenerator.genFailResult(ResultCode.UNAUTHORIZED, "部门没有审核员");
             } else {
@@ -345,7 +345,7 @@ public class TMAccountController {
                 }
             } else {
                 Member driver = tmMemberService.findById(dispatchCarDetail.getDriverId());
-                Car car=tmCarService.findById(driver.getJobNumber());
+                //Car car=tmCarService.findById(driver.getJobNumber());
                 if(driver==null){
                     log.info("司机未加入企业微信");
                     return ResultGenerator.genFailResult("司机未加入企业微信");
@@ -357,14 +357,8 @@ public class TMAccountController {
                     dispatchCarDetail.setDriver(driverUserId);
                     tmDispatchCarDetailService.updateDetail(dispatchCarDetail);
                     String content="";
-                    if(car!=null) {
-                        log.info("二级审批car为空");
-                         content= dispatchCarDetail.toString()+"驾驶员："+driver.getAccountName()+";\n"
-                                +"驾驶员电话："+driver.getTelephone()+"\n"+car.getLicense();
-                    }else{
-                        content="有新的派车信息:\n" + dispatchCarDetail.toString()+"驾驶员："+driver.getAccountName()+";\n"
-                                +"驾驶员电话："+driver.getTelephone()+"\n驾驶员车牌:没有录入";
-                    }
+                    content= dispatchCarDetail.toString()+"驾驶员："+driver.getAccountName()+";\n"
+                                +"驾驶员电话："+driver.getTelephone()+"\n车牌号："+dispatchCarDetail.getCarNumber();
                     sendCompanyMessage.sendWeChatMsgText(driverUserId, "1", "", "有新的派车信息:\n" +content, "0");
                     if(appLicantUserId!=null){
                         sendCompanyMessage.sendWeChatMsgText(appLicantUserId, "1", "","你的申请已经审核完成:\n" + content , "0");
