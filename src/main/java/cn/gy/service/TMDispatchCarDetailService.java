@@ -2,6 +2,7 @@ package cn.gy.service;
 
 import cn.gy.bean.DispatchCarDetail;
 import cn.gy.bean.DispatchCarDetailVo;
+import cn.gy.bean.DispatchCarDetailWebVo;
 import cn.gy.bean.Member;
 import cn.gy.bean.TMAccount;
 import cn.gy.constant.AuditStatusEnum;
@@ -33,7 +34,7 @@ public class TMDispatchCarDetailService extends AbstractService<DispatchCarDetai
 	private TMDispatchCarDetailMapper tmDispatchCarDetailMapper;
 	@Resource
 	private SendCompanyMessage sendCompanyMessage;
-	public List<DispatchCarDetail> getList(String name) {
+	public List<DispatchCarDetailWebVo> getList(String name) {
 		return tmDispatchCarDetailMapper.getList(name);
 	}
 

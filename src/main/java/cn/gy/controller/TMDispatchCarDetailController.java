@@ -4,6 +4,7 @@ package cn.gy.controller;
 import cn.gy.bean.Car;
 import cn.gy.bean.DispatchCarDetail;
 import cn.gy.bean.DispatchCarDetailVo;
+import cn.gy.bean.DispatchCarDetailWebVo;
 import cn.gy.bean.Member;
 import cn.gy.bean.PageInfoVo;
 import cn.gy.core.web.Result;
@@ -60,11 +61,11 @@ public class TMDispatchCarDetailController {
     private static final String rootFilePath = "/usr/local/webserver/nginx/html/";
 
     @GetMapping("/detail/query")
-    public Result<PageInfoVo<DispatchCarDetail>> list(@RequestParam(defaultValue = "1") Integer page, @RequestParam(defaultValue = "10") Integer size,
-                                                      @RequestParam(required = false) String name) {
+    public Result<PageInfoVo<DispatchCarDetailWebVo>> list(@RequestParam(defaultValue = "1") Integer page, @RequestParam(defaultValue = "10") Integer size,
+                                                           @RequestParam(required = false) String name) {
         PageHelper.startPage(page, size);
-        List<DispatchCarDetail> list = tmDispatchCarDetailService.getList(name);
-        PageInfo<DispatchCarDetail> pageInfo = new PageInfo<>(list);
+        List<DispatchCarDetailWebVo> list = tmDispatchCarDetailService.getList(name);
+        PageInfo<DispatchCarDetailWebVo> pageInfo = new PageInfo<>(list);
         return ResultGenerator.genSuccessResult(
                 new PageInfoVo<>(pageInfo.getList(), pageInfo.getTotal()));
     }

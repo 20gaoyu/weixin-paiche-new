@@ -2,6 +2,7 @@ package cn.gy.dao;
 
 
 import cn.gy.bean.DispatchCarDetail;
+import cn.gy.bean.DispatchCarDetailWebVo;
 import cn.gy.bean.Member;
 import cn.gy.core.mapper.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -11,7 +12,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface TMDispatchCarDetailMapper extends Mapper<DispatchCarDetail> {
-	List<DispatchCarDetail> getList(@Param("name") String name);
+	List<DispatchCarDetailWebVo> getList(@Param("name") String name);
 
     void updateRoleNameByRoleId(@Param("roleName") String roleName, @Param("roleId") BigInteger roleId);
 
