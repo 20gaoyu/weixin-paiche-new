@@ -12,20 +12,16 @@ import javax.validation.constraints.NotNull;
 import java.util.Date;
 
 @Data
-@Table(name = "t_m_department")
-public class Department {
+public class DepartmentWebVo {
 
-    @Id
-    @NotNull(groups = {Update.class}, message = "id不能为空")
-    @Column(name = "id")
+
     private  Long id;
-    @JSONField(name = "部门")
-    @Column(name = "department_name")
+    @JsonProperty( "部门")
     private  String departmentName;
-    @JSONField(name = "创建时间")
+    @JsonProperty( "创建时间")
     @Column(name = "create_time")
     private  Date createTime;
-    @JSONField(name = "操作")
+    @JsonProperty( "操作")
     @Column(name = "parent_id")
     private  Long parentId;
 }

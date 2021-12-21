@@ -146,7 +146,7 @@ public class TMDispatchCarDetailController {
             sheet1.addMergedRegion(new CellRangeAddress(0,0,0,3));
 
             String[] headers = {"ID", "申请人", "使用者", "开始时间","结束时间","是否评价","用车原因",
-                    "目的地","一级审核","二级审核","审核状态","操作","创建时间","部门","电话"};
+                    "目的地","一级审核","二级审核","审核状态","操作","创建时间","部门","电话","用车人数"};
             HSSFCellStyle style = workbook.createCellStyle();
             style.setDataFormat(HSSFDataFormat.getBuiltinFormat("m/d/yy h:mm:ss"));
             HSSFFont font = workbook.createFont();
@@ -194,6 +194,7 @@ public class TMDispatchCarDetailController {
                 rowRowNum.createCell(rowNumCellN++).setCellValue(format.format(dispatchCarDetail.getCreateTime()));
                 rowRowNum.createCell(rowNumCellN++).setCellValue(String.valueOf(dispatchCarDetail.getDepartmentName()));
                 rowRowNum.createCell(rowNumCellN++).setCellValue(String.valueOf(dispatchCarDetail.getTelephone()));
+                rowRowNum.createCell(rowNumCellN++).setCellValue(String.valueOf(dispatchCarDetail.getUseNumber()));
                 rowNum++;
             }
 //            isDirExist(rootFilePath+formatToday.format(new Date()));

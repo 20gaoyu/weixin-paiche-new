@@ -2,6 +2,7 @@ package cn.gy.dao;
 
 
 import cn.gy.bean.Department;
+import cn.gy.bean.DepartmentWebVo;
 import cn.gy.core.mapper.Mapper;
 import org.apache.ibatis.annotations.Param;
 

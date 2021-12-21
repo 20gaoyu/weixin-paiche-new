@@ -3,6 +3,7 @@ package cn.gy.controller;
 
 import cn.gy.bean.Car;
 import cn.gy.bean.Department;
+import cn.gy.bean.DepartmentWebVo;
 import cn.gy.bean.PageInfoVo;
 import cn.gy.core.web.Result;
 import cn.gy.core.web.ResultGenerator;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -38,14 +40,25 @@ public class TMDepartmentController {
 
 
     @GetMapping("/department/query")
-    public Result<PageInfoVo<Department>> list(@RequestParam(defaultValue = "1") Integer page, @RequestParam(defaultValue = "10") Integer size,
-                                               @RequestParam(required = false) String name) {
+    public Result<PageInfoVo<DepartmentWebVo>> list(@RequestParam(defaultValue = "1") Integer page, @RequestParam(defaultValue = "10") Integer size,
+                                                    @RequestParam(required = false) String name) {
         log.info("query start.{}",name);
         PageHelper.startPage(page, size);
-        List<Department> list = tmDepartmentService.getList(name);
-        PageInfo<Department> pageInfo = new PageInfo<>(list);
+        List<Department> listD = tmDepartmentService.getList(name);
+        log.info("listD.{}",listD.size());
+        List<DepartmentWebVo> listW=new ArrayList<>();
+        for(Department department:listD){
+            DepartmentWebVo departmentW=new DepartmentWebVo();
+            departmentW.setId(department.getId());
+            departmentW.setCreateTime(department.getCreateTime());
+            departmentW.setDepartmentName(department.getDepartmentName());
+            departmentW.setParentId(department.getParentId());
+            listW.add(departmentW);
+        }
+        PageInfo<Department> pageInfo = new PageInfo<>(listD);
+        long total = pageInfo.getTotal();
         return ResultGenerator.genSuccessResult(
-                new PageInfoVo<>(pageInfo.getList(), pageInfo.getTotal()));
+                new PageInfoVo<>(listW, total));
     }
 
     /**

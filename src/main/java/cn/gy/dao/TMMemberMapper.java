@@ -2,6 +2,7 @@ package cn.gy.dao;
 
 
 import cn.gy.bean.Member;
+import cn.gy.bean.MemberWebVo;
 import cn.gy.core.mapper.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -10,7 +11,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface TMMemberMapper extends Mapper<Member> {
-	List<Member> getList(@Param("name") String name);
+	List<MemberWebVo> getList(@Param("name") String name);
 
     void updateRoleNameByRoleId(@Param("roleName") String roleName, @Param("roleId") BigInteger roleId);
 

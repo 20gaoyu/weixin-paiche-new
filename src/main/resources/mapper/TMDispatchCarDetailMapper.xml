@@ -19,19 +19,19 @@
         <result column="end_time" jdbcType="TIMESTAMP" property="endTime"/>
         <result column="status" jdbcType="VARCHAR" property="status"/>
         <result column="operation" jdbcType="VARCHAR" property="operation"/>
-        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="cancel_reason" jdbcType="VARCHAR" property="cancelReason"/>
     </resultMap>
 
     <select id="getList" resultMap="BaseResultMap">
-        select a.id, a.applicant, a.user,a.useNumber,a.department_name,
-        a.if_comment, a.use_reason, a.destination, a.one_audit,a.two_audit,a.start_time,a.end_time,a.status,a.operation,a.create_time
+        select a.id, a.applicant, a.user,a.useNumber,a.department_name,a.cancel_reason,
+        a.if_comment, a.use_reason, a.destination, a.one_audit,a.two_audit,a.start_time,a.end_time,a.status,a.operation
         from t_m_dispatch_car_detail a
         <where>
             <if test="name != null and name.length() > 0">  a.applicant like concat('%',
                 #{name, jdbcType=VARCHAR}, '%')
             </if>
         </where>
-        ORDER BY a.applicant, a.user
+        ORDER BY a.start_time desc, a.applicant
     </select>
 
 

@@ -33,7 +33,7 @@ public class TMMemberService extends AbstractService<Member> {
 	@Resource
 	private TMMemberMapper tmMemberMapper;
 
-	public List<Member> getList(String memberName) {
+	public List<MemberWebVo> getList(String memberName) {
 		return tmMemberMapper.getList(memberName);
 	}
 
