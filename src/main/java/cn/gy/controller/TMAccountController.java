@@ -248,19 +248,42 @@ public class TMAccountController {
                 memberList = tmMemberService.getMember(dispatchCarDetail.getDepartmentName(), PositionEnum.AUDITD_IRECTOR.getName());
 //            }
             if (memberList.isEmpty()) {
+                log.info("部门没有审核员");
                 return ResultGenerator.genFailResult(ResultCode.UNAUTHORIZED, "部门没有审核员");
             } else {
                 dispatchCarDetail.setStatus(AuditStatusEnum.AUDITDING.getName());
-                dispatchCarDetail.setOneAudit(memberList.get(0).getAccountName());
-                tmDispatchCarDetailService.add(dispatchCarDetail);
-                String userId = sendCompanyMessage.getUserId(memberList.get(0).getTelephone());
-                if (userId != null) {
-                    log.info("一级审核人:{}，电话:{},userId:{}",userId,memberList.get(0).getAccountName(),memberList.get(0).getTelephone());
-                    sendCompanyMessage.sendMiniProgramtNewsMsg(dispatchCarDetail.getId()+"", userId, "1",dispatchCarDetail.getApplicant());
-                    return ResultGenerator.genSuccessResult("提交成功");
-                } else {
-                    log.info("一级审核人未加入企业微信");
-                    return ResultGenerator.genFailResult("一级审核人未加入企业微信");
+                if("网络运营部".equals(department.getDepartmentName())){
+                    String name="";
+                    int i=0;
+                    for(Member member:memberList){
+                        name=name+";"+member.getAccountName();
+                        String userId = sendCompanyMessage.getUserId(member.getTelephone());
+                        if (userId != null) {
+                            i++;
+                            log.info("一级审核人:{}，电话:{},userId:{}",userId,member.getAccountName(),member.getTelephone());
+                            sendCompanyMessage.sendMiniProgramtNewsMsg(dispatchCarDetail.getId()+"", userId, "1",dispatchCarDetail.getApplicant());
+                        }
+                    }
+                    if(i>0){
+                        dispatchCarDetail.setOneAudit(name);
+                        tmDispatchCarDetailService.add(dispatchCarDetail);
+                        return ResultGenerator.genSuccessResult("提交成功");
+                    }else{
+                        log.info("一级审核人未加入企业微信");
+                        return ResultGenerator.genFailResult("一级审核人未加入企业微信");
+                    }
+                }else{
+                    dispatchCarDetail.setOneAudit(memberList.get(0).getAccountName());
+                    String userId = sendCompanyMessage.getUserId(memberList.get(0).getTelephone());
+                    if (userId != null) {
+                        tmDispatchCarDetailService.add(dispatchCarDetail);
+                        log.info("一级审核人:{}，电话:{},userId:{}",userId,memberList.get(0).getAccountName(),memberList.get(0).getTelephone());
+                        sendCompanyMessage.sendMiniProgramtNewsMsg(dispatchCarDetail.getId()+"", userId, "1",dispatchCarDetail.getApplicant());
+                        return ResultGenerator.genSuccessResult("提交成功");
+                    } else {
+                        log.info("一级审核人未加入企业微信");
+                        return ResultGenerator.genFailResult("一级审核人未加入企业微信");
+                    }
                 }
 
             }
