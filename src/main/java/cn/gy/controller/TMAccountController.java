@@ -380,7 +380,7 @@ public class TMAccountController {
                 if (driverUserId != null) {
                     log.info("driver {},oneAudit:{},TwoAudit:{}",driverUserId,dispatchCarDetail.getOneAudit(),dispatchCarDetail.getTwoAudit());
                     dispatchCarDetail.setStatus(AuditStatusEnum.COMPLETE.getName());
-                    dispatchCarDetail.setDriver(driverUserId);
+                    dispatchCarDetail.setDriver(driver.getAccountName()+"|"+dispatchCarDetail.getCarNumber());
                     tmDispatchCarDetailService.updateDetail(dispatchCarDetail);
                     String content="";
                     content= dispatchCarDetail.toString()+"驾驶员："+driver.getAccountName()+";\n"

@@ -72,12 +72,13 @@ public class TMDispatchCarDetailController {
 
     /**
      * 从mysql的日志字段表中插入数据
+     *
      * @return
      */
     @ApiOperation(value = "新增日志字段", notes = "插入日志字段数据")
     @PutMapping("/detail/insert")
     public Result<String> add(@RequestBody @Valid DispatchCarDetail request) {
-        log.info("start.{}",request);
+        log.info("start.{}", request);
         try {
             return tmDispatchCarDetailService.add(request);
         } catch (Exception e) {
@@ -88,12 +89,13 @@ public class TMDispatchCarDetailController {
 
     /**
      * 从mysql的日志字段表中更新数据
+     *
      * @return
      */
     @ApiOperation(value = "更新日志字段", notes = "更新日志字段数据")
     @PutMapping("/detail/update")
     public Result<String> update(@RequestBody @Valid DispatchCarDetailVo request) {
-        log.info("updata start.{}",request);
+        log.info("updata start.{}", request);
         try {
             return tmDispatchCarDetailService.updateDetailWeb(request);
         } catch (Exception e) {
@@ -104,12 +106,13 @@ public class TMDispatchCarDetailController {
 
     /**
      * 从mysql的日志字段表中删除数据
+     *
      * @return
      */
     @ApiOperation(value = "删除日志字段", notes = "删除日志字段数据")
     @GetMapping("/detail/delete")
     public Result<String> delete(@RequestParam(required = false) Long id) {
-        log.info("delete start. {}",id);
+        log.info("delete start. {}", id);
         try {
             return tmDispatchCarDetailService.deleteAllbyDetail(id);
         } catch (Exception e) {
@@ -117,9 +120,10 @@ public class TMDispatchCarDetailController {
         }
         return null;
     }
+
     @GetMapping("/detail/findbyid")
     public Result<DispatchCarDetail> find(@RequestParam(required = false) long id) {
-        log.info("find start.{}",id);
+        log.info("find start.{}", id);
         try {
             return ResultGenerator.genSuccessResult(tmDispatchCarDetailService.findById(id));
         } catch (Exception e) {
@@ -127,26 +131,27 @@ public class TMDispatchCarDetailController {
         }
         return null;
     }
+
     @GetMapping("/detail/export")
-    public Result<String> export(@RequestParam(required = true) String startTime,@RequestParam(required = true) String endTime) {
-        log.info("find export.{},{}",startTime,endTime);
+    public Result<String> export(@RequestParam(required = true) String startTime, @RequestParam(required = true) String endTime) {
+        log.info("find export.{},{}", startTime, endTime);
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         SimpleDateFormat formatToday = new SimpleDateFormat("yyyyMMddHHmmss");
         String date = formatToday.format(new Date());
-        String fileName = date+"_detail.xls";
-        String path=rootFilePath+fileName;
+        String fileName = date + "_detail.xls";
+        String path = rootFilePath + fileName;
         try {
             HSSFWorkbook workbook = new HSSFWorkbook();
             HSSFSheet sheet1 = workbook.createSheet("sheet1");
-            List<DispatchCarDetail> usersList = tmDispatchCarDetailService.getListByTime(startTime,endTime);
-          //          .queryForList("SELECT u.id,u.userName,u.userAge,u.userAddress FROM user u");
+            List<DispatchCarDetail> usersList = tmDispatchCarDetailService.getListByTime(startTime, endTime);
+            //          .queryForList("SELECT u.id,u.userName,u.userAge,u.userAddress FROM user u");
             // 设置列宽
-            sheet1.setColumnWidth(0, 30*256);
+            sheet1.setColumnWidth(0, 30 * 256);
             // 合并单元格   参数说明：1：开始行 2：结束行  3：开始列 4：结束列
-            sheet1.addMergedRegion(new CellRangeAddress(0,0,0,3));
+            sheet1.addMergedRegion(new CellRangeAddress(0, 0, 0, 3));
 
-            String[] headers = {"ID", "申请人", "使用者", "开始时间","结束时间","是否评价","用车原因",
-                    "目的地","一级审核","二级审核","审核状态","操作","创建时间","部门","电话","用车人数"};
+            String[] headers = {"ID", "申请人", "使用者", "开始时间", "结束时间", "是否评价", "用车原因",
+                    "目的地", "一级审核", "二级审核", "审核状态", "操作", "创建时间", "部门", "电话", "用车人数", "司机", "车牌号"};
             HSSFCellStyle style = workbook.createCellStyle();
             style.setDataFormat(HSSFDataFormat.getBuiltinFormat("m/d/yy h:mm:ss"));
             HSSFFont font = workbook.createFont();
@@ -168,7 +173,7 @@ public class TMDispatchCarDetailController {
 
             // 第二行
             HSSFRow row1 = sheet1.createRow(1);
-            for(int i=0;i<headers.length;i++){
+            for (int i = 0; i < headers.length; i++) {
                 HSSFCell cell = row1.createCell(i);
                 HSSFRichTextString text2 = new HSSFRichTextString(headers[i]);
                 cell.setCellValue(text2);
@@ -176,7 +181,7 @@ public class TMDispatchCarDetailController {
             }
             // 第三行及以后
             int rowNum = 2;
-            for(DispatchCarDetail dispatchCarDetail : usersList){
+            for (DispatchCarDetail dispatchCarDetail : usersList) {
                 int rowNumCellN = 0;
                 HSSFRow rowRowNum = sheet1.createRow(rowNum);
                 rowRowNum.createCell(rowNumCellN++).setCellValue(String.valueOf(dispatchCarDetail.getId()));
@@ -195,6 +200,22 @@ public class TMDispatchCarDetailController {
                 rowRowNum.createCell(rowNumCellN++).setCellValue(String.valueOf(dispatchCarDetail.getDepartmentName()));
                 rowRowNum.createCell(rowNumCellN++).setCellValue(String.valueOf(dispatchCarDetail.getTelephone()));
                 rowRowNum.createCell(rowNumCellN++).setCellValue(String.valueOf(dispatchCarDetail.getUseNumber()));
+                if (dispatchCarDetail.getDriver() != null) {
+                    String[] split = dispatchCarDetail.getDriver().split("\\|");
+                    if(split.length>1){
+                        rowRowNum.createCell(rowNumCellN++).setCellValue(split[0]);
+                        rowRowNum.createCell(rowNumCellN++).setCellValue(split[1]);
+                    }else if(split.length==1){
+                        rowRowNum.createCell(rowNumCellN++).setCellValue(split[0]);
+                        rowRowNum.createCell(rowNumCellN++).setCellValue("-");
+                    }else{
+                        rowRowNum.createCell(rowNumCellN++).setCellValue("-");
+                        rowRowNum.createCell(rowNumCellN++).setCellValue("-");
+                    }
+                }else{
+                    rowRowNum.createCell(rowNumCellN++).setCellValue("-");
+                    rowRowNum.createCell(rowNumCellN++).setCellValue("-");
+                }
                 rowNum++;
             }
 //            isDirExist(rootFilePath+formatToday.format(new Date()));
@@ -203,14 +224,21 @@ public class TMDispatchCarDetailController {
             outputStream.close();
             workbook.close();
         } catch (Exception e) {
-            log.info("导出失败",e);
+            log.info("导出失败", e);
         }
-        return ResultGenerator.genSuccessResult("./"+fileName);
+        return ResultGenerator.genSuccessResult("./" + fileName);
     }
+
     public void isDirExist(String fileDir) {
         File file = new File(fileDir);
-        if(!file.exists()) {
+        if (!file.exists()) {
             file.mkdir();
         }
+    }
+
+    public static void main(String[] args) {
+
+        String[] split = "吴昊|acdg123".split("\\|");
+        System.out.println(split[0]+"  "+split[1]);
     }
 }
